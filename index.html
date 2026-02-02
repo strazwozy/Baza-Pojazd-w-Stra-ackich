@@ -91,24 +91,10 @@ function displayWozow() {
 document.getElementById('search').addEventListener('input', displayWozow);
 document.getElementById('filterWoj').addEventListener('change', displayWozow);
 
-  //Lightbox
-  function openLightbox(woz) {
-    document.getElementById(‚lightbox-img’).src = woz.Zdjęcie;
-    document.getElementById(‚lightbox-info’).innerHTML = `
-        <strong>ID:</strong> ${woz.ID} <br>
-        <strong>Jednostka:</strong> ${woz.Jednostka} <br>
-        <strong>Województwo:</strong> ${woz.Województwo} <br>
-        <strong>Marka:</strong> ${woz.Marka} <br>
-        <strong>Rok:</strong> ${woz.Rok} <br>
-        <strong>Status:</strong> ${woz.Status} <br>
-        <strong>Rejestracja:</strong> ${woz.Rejestracja || ‚-‚} <br>
-        <strong>Inne:</strong> ${woz.Inne || ‚-‚}
-    `;
-    document.getElementById(‚lightbox’).style.display = ‚flex’;
+ 
 }
 
-function closeLightbox() {
-    document.getElementById(‚lightbox’).style.display = ‚none’;
+
 }
   
 </script>
