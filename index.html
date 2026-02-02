@@ -48,9 +48,15 @@ Papa.parse(csvUrl, {
     header: true,
     complete: function(results) {
         window.wozy = results.data;
+      // SORTOWANIE PO ID (rosnąco)
+        window.wozy.sort((a, b) => {
+            return Number(a.ID) - Number(b.ID);
+        });
+
         displayWozow();
     }
 });
+      
 
 function displayWozow() {
     const lista = document.getElementById('lista');
