@@ -146,10 +146,17 @@ function displayWozow(){
     pagination.innerHTML='';
 
     window.wozy.sort((a,b)=>{
-        let valA=a[sortBy]||''; let valB=b[sortBy]||'';
-        if(sortBy==='ID') return Number(valA)-Number(valB);
-        return valA.toString().localeCompare(valB.toString());
-    });
+if(sortBy==='ID'){ 
+    const valA = parseInt(a.ID) || 0;
+    const valB = parseInt(b.ID) || 0;
+    return valA - valB;
+} else {
+    const valA = (a[sortBy] || '').toString().toLowerCase();
+        const valB = (b[sortBy] || '').toString().toLowerCase();
+        return valA.localeCompare(valB);
+    }
+});
+        
 
     filteredWozki = window.wozy.filter(w=>{
         return (
