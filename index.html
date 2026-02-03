@@ -5,86 +5,50 @@
 <title>🚒 Baza wozów strażackich</title>
 <style>
 body { font-family: Arial; background:#f2f2f2; padding:20px; }
-h1 { text-align: center; }
-#search, #filterWoj, .sort-buttons button, #pagination button { margin:10px 5px; padding:5px; font-size: 16px; }
+h1 { text-align: center; margin-bottom: 20px; }
+#search, #filterWoj, #sortBy { margin:10px 5px; padding:5px; font-size: 16px; border-radius:5px; border:1px solid #ccc; }
+#sortBy { background: #ff4d4d; color:white; border:none; }
 #lista { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-.woz { background:white; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items: center; width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
-.woz img { width: 180px; height: 120px; border-radius:6px; margin-bottom:10px; object-fit: cover; cursor:pointer; }
+.woz { background:white; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items: center; width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor:pointer; }
+.woz img { width: 180px; height: 120px; border-radius:6px; margin-bottom:10px; object-fit: cover; }
 .woz-info { display:flex; flex-direction: column; gap:3px; text-align: left; width: 100%; }
-.woz-info strong { display:inline-block; width: 80px; }
-
-.sort-buttons button {
-    background-color: #c8102e; 
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    margin: 0 5px;
-    font-size: 14px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.sort-buttons button:hover { background-color: #ff4d4d; }
-
-#pagination button {
-    background-color: #c8102e;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 0 5px;
-    transition: background 0.2s;
-}
-#pagination button:hover { background-color: #ff4d4d; }
+.woz-info strong { display:inline-block; width: 90px; }
 
 /* Lightbox */
-#lightbox {
-    display: none;
-    position: fixed;
-    z-index: 999;
-    top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.9);
-    justify-content: center;
-    align-items: center;
-}
-#lightbox-content {
-    display: flex;
-    background: #222;
-    border-radius: 10px;
-    padding: 20px;
-    width: 80%;
-    max-width: 1000px;
-    height: 70%;
-    max-height: 700px;
-    gap: 20px;
-    overflow: hidden;
-}
-#lightbox img { width: 50%; height: 100%; object-fit: cover; border-radius:8px; }
-#lightbox .details { color:white; width: 50%; overflow-y:auto; }
-#lightbox .details p { margin: 4px 0; }
-#lightbox .close { position:absolute; top:20px; right:30px; font-size:30px; color:white; cursor:pointer; }
-#lightbox .nav { position:absolute; top:50%; transform:translateY(-50%); font-size:50px; color:white; cursor:pointer; padding:10px; user-select:none; }
-#lightbox .prev { left:10px; }
-#lightbox .next { right:10px; }
+#lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); justify-content:center; align-items:center; z-index:1000; }
+#lightboxContent { background:#cc0000; display:flex; max-width:900px; width:90%; border-radius:10px; overflow:hidden; color:white; }
+#lightbox img { max-width:50%; object-fit: contain; }
+#lightboxInfo { padding:20px; flex:1; display:flex; flex-direction:column; justify-content: space-between; }
+#lightboxInfo h2 { margin:0 0 10px 0; }
+#lightboxInfo div { margin: 5px 0; }
+#closeLightbox { background:#333; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; margin-top:10px; width:100%; }
+#prevBtn, #nextBtn { position:absolute; top:50%; transform:translateY(-50%); font-size:30px; color:white; background:rgba(0,0,0,0.5); border:none; padding:10px; cursor:pointer; border-radius:50%; }
+#prevBtn { left:10px; }
+#nextBtn { right:10px; }
 
-/* Responsywność na telefony */
-@media (max-width: 600px) {
+/* Status colors */
+.status-czynny { color:limegreen; }
+.status-wycofany { color:red; }
+.status-przeniesiony { color:yellow; }
+.status-muzeum { color:deepskyblue; }
+.status-sprzedany { color:red; }
+.status-rozbity { color:red; }
+.status-spalony { color:red; }
+.status-porzucony { color:orange; }
+
+/* Responsywność */
+@media (max-width:600px){
     #lista { flex-direction: column; align-items: center; }
-    .woz { width: 90%; }
-    .woz img { width: 100%; height: auto; }
-    .woz-info strong { width: 100px; }
-    #lightbox-content { flex-direction: column; width: 90%; height: auto; max-height: 90%; }
-    #lightbox img, #lightbox .details { width: 100%; height: auto; }
+    #lightboxContent { flex-direction: column; max-width:90%; }
+    #lightbox img { max-width:100%; }
 }
 </style>
 </head>
 <body>
 
-<h1>🚒 Baza wozów strażackich w Polsce</h1>
+<h1>🚒 Baza wozów strażackich</h1>
 
-<input type="text" id="search" placeholder="Szukaj jednostki, ID, rejestracji lub marki...">
-
+<input type="text" id="search" placeholder="Szukaj jednostki, ID, rejestracji, marki...">
 <select id="filterWoj">
   <option value="">Wszystkie województwa</option>
   <option value="Małopolskie">Małopolskie</option>
@@ -104,86 +68,96 @@ h1 { text-align: center; }
   <option value="Zachodniopomorskie">Zachodniopomorskie</option>
 </select>
 
-<div class="sort-buttons">
-  <button id="sortID">ID ↑</button>
-  <button id="sortJednostka">Jednostka ↑</button>
-  <button id="sortMarka">Marka ↑</button>
-  <button id="sortRejestracja">Rejestracja ↑</button>
-</div>
+<select id="sortBy">
+  <option value="ID">Sortuj po ID</option>
+  <option value="Marka">Sortuj po marce</option>
+  <option value="Jednostka">Sortuj po jednostce</option>
+  <option value="Rejestracja">Sortuj po rejestracji</option>
+  <option value="Rok produkcji">Sortuj po roku</option>
+</select>
 
 <div id="lista"></div>
 
-<div id="pagination">
-  <button id="prevPage">Poprzednia</button>
-  <span id="pageInfo">1</span>
-  <button id="nextPage">Następna</button>
-</div>
-
 <!-- Lightbox -->
 <div id="lightbox">
-  <span class="close">&times;</span>
-  <span class="nav prev">&#10094;</span>
-  <span class="nav next">&#10095;</span>
-  <div id="lightbox-content">
-    <img src="">
-    <div class="details"></div>
-  </div>
+    <button id="prevBtn">&#8592;</button>
+    <div id="lightboxContent">
+        <img id="lightboxImg" src="">
+        <div id="lightboxInfo">
+            <h2 id="lightboxTitle">Marka</h2>
+            <div id="lightboxDetails"></div>
+            <button id="closeLightbox">Zamknij</button>
+        </div>
+    </div>
+    <button id="nextBtn">&#8594;</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
 const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
-let sortField = 'ID', sortAsc = true, currentPage = 1, perPage = 80;
+const limitPerPage = 80;
+let currentPage = 1;
+let totalPages = 1;
+let filteredWozki = [];
 let currentLightboxIndex = 0;
 
 Papa.parse(csvUrl, {
     download: true,
     header: true,
     skipEmptyLines: true,
-    complete: function(results) {
+    complete: function(results){
         window.wozy = results.data;
+        window.wozy.sort((a,b)=>Number(a.ID)-Number(b.ID));
         displayWozow();
     }
 });
 
-function displayWozow() {
+function getStatusClass(status){
+    if(!status) return '';
+    status = status.toLowerCase();
+    if(status.includes('czynny')) return 'status-czynny';
+    if(status.includes('wycofany')) return 'status-wycofany';
+    if(status.includes('przeniesiony')) return 'status-przeniesiony';
+    if(status.includes('muzeum')) return 'status-muzeum';
+    if(status.includes('sprzedany')) return 'status-sprzedany';
+    if(status.includes('rozbity')) return 'status-rozbity';
+    if(status.includes('spłonął') || status.includes('spalony')) return 'status-spalony';
+    if(status.includes('porzucony')) return 'status-porzucony';
+    return '';
+}
+
+function displayWozow(){
     const lista = document.getElementById('lista');
     const search = document.getElementById('search').value.toLowerCase();
     const wojFilter = document.getElementById('filterWoj').value;
-    lista.innerHTML = '';
+    const sortBy = document.getElementById('sortBy').value;
+    lista.innerHTML='';
 
-    let filtered = window.wozy.filter(w => (
-        (w.Jednostka && w.Jednostka.toLowerCase().includes(search)) ||
-        (w.ID && w.ID.toString().includes(search)) ||
-        (w.Rejestracja && w.Rejestracja.toLowerCase().includes(search)) ||
-        (w.Marka && w.Marka.toLowerCase().includes(search))
-    ) && (wojFilter === '' || w.Województwo === wojFilter));
-
-    filtered.sort((a,b)=>{
-        let valA=a[sortField]||'', valB=b[sortField]||'';
-        if(sortField==='ID') return sortAsc ? Number(valA)-Number(valB) : Number(valB)-Number(valA);
-        return sortAsc ? valA.toString().localeCompare(valB.toString()) : valB.toString().localeCompare(valA.toString());
+    filteredWozki = window.wozy.filter(w=>{
+        return (
+            (w.Jednostka && w.Jednostka.toLowerCase().includes(search)) ||
+            (w.ID && w.ID.toString().includes(search)) ||
+            (w.Rejestracja && w.Rejestracja.toLowerCase().includes(search)) ||
+            (w.Marka && w.Marka.toLowerCase().includes(search))
+        ) && (wojFilter === '' || w.Województwo === wojFilter);
     });
 
-    const start=(currentPage-1)*perPage, end=start+perPage;
-    const pageData=filtered.slice(start,end);
+    filteredWozki.sort((a,b)=>{
+        let valA = a[sortBy] || '';
+        let valB = b[sortBy] || '';
+        if(sortBy==='ID'||sortBy==='Rok produkcji') return Number(valA)-Number(valB);
+        return valA.toString().localeCompare(valB.toString());
+    });
 
-    const statusColors = {
-        'czynny': 'green',
-        'wycofany ze służby': 'red',
-        'przeniesiony': 'yellow',
-        'obiekt muzeum': 'blue',
-        'sprzedany': 'red',
-        'rozbity': 'red',
-        'spłonął': 'red',
-        'porzucony': 'orange'
-    };
+    totalPages = Math.ceil(filteredWozki.length/limitPerPage);
+    if(currentPage>totalPages) currentPage=totalPages;
 
-    pageData.forEach((w,i)=>{
-        const div=document.createElement('div');
+    const start = (currentPage-1)*limitPerPage;
+    const end = start+limitPerPage;
+    filteredWozki.slice(start,end).forEach((w,i)=>{
+        const div = document.createElement('div');
         div.className='woz';
-        const statusText=w.Status||'-';
-        const statusColor=statusColors[statusText.toLowerCase()]||'black';
+        div.dataset.index = start+i;
         div.innerHTML=`
             <img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}" alt="${w.Jednostka}">
             <div class="woz-info">
@@ -193,65 +167,51 @@ function displayWozow() {
                 <strong>Powiat:</strong> ${w.Powiat||'-'}
                 <strong>Marka:</strong> ${w.Marka||'-'}
                 <strong>Rok:</strong> ${w['Rok produkcji']||'-'}
-                <strong>Status:</strong> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span>
+                <strong>Status:</strong> <span class="${getStatusClass(w.Status)}">${w.Status||'-'}</span>
                 <strong>Rejestracja:</strong> ${w.Rejestracja||'-'}
                 <strong>Inne:</strong> ${w.Inne||'-'}
             </div>
         `;
+        div.addEventListener('click', ()=>openLightbox(start+i));
         lista.appendChild(div);
-
-        div.querySelector('img').addEventListener('click', () => {
-            currentLightboxIndex = window.wozy.indexOf(w);
-            showLightbox();
-        });
     });
-
-    document.getElementById('pageInfo').textContent = `${currentPage} / ${Math.ceil(filtered.length/perPage) || 1}`;
 }
 
-function showLightbox() {
-    const w = window.wozy[currentLightboxIndex];
-    const statusColors = {
-        'czynny': 'green',
-        'wycofany ze służby': 'red',
-        'przeniesiony': 'yellow',
-        'obiekt muzeum': 'blue',
-        'sprzedany': 'red',
-        'rozbity': 'red',
-        'spłonął': 'red',
-        'porzucony': 'orange'
-    };
-    const statusText = w.Status || '-';
-    const statusColor = statusColors[statusText.toLowerCase()] || 'black';
-    document.querySelector('#lightbox img').src = w.Zdjęcie || 'https://via.placeholder.com/600x400?text=Brak+zdjęcia';
-    document.querySelector('#lightbox .details').innerHTML = `
-        <p><strong>ID:</strong> ${w.ID||'-'}</p>
-        <p><strong>Jednostka:</strong> ${w.Jednostka||'-'}</p>
-        <p><strong>Województwo:</strong> ${w.Województwo||'-'}</p>
-        <p><strong>Powiat:</strong> ${w.Powiat||'-'}</p>
-        <p><strong>Marka:</strong> ${w.Marka||'-'}</p>
-        <p><strong>Rok:</strong> ${w['Rok produkcji']||'-'}</p>
-        <p><strong>Status:</strong> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span></p>
-        <p><strong>Rejestracja:</strong> ${w.Rejestracja||'-'}</p>
-        <p><strong>Inne:</strong> ${w.Inne||'-'}</p>
-    `;
-    document.getElementById('lightbox').style.display='flex';
-}
-
-// Eventy
+// eventy
 document.getElementById('search').addEventListener('input', ()=>{currentPage=1; displayWozow();});
 document.getElementById('filterWoj').addEventListener('change', ()=>{currentPage=1; displayWozow();});
-document.getElementById('sortID').addEventListener('click', ()=>{sortField==='ID'?sortAsc=!sortAsc:(sortField='ID',sortAsc=true); currentPage=1; displayWozow();});
-document.getElementById('sortJednostka').addEventListener('click', ()=>{sortField==='Jednostka'?sortAsc=!sortAsc:(sortField='Jednostka',sortAsc=true); currentPage=1; displayWozow();});
-document.getElementById('sortMarka').addEventListener('click', ()=>{sortField==='Marka'?sortAsc=!sortAsc:(sortField='Marka',sortAsc=true); currentPage=1; displayWozow();});
-document.getElementById('sortRejestracja').addEventListener('click', ()=>{sortField==='Rejestracja'?sortAsc=!sortAsc:(sortField='Rejestracja',sortAsc=true); currentPage=1; displayWozow();});
-document.getElementById('prevPage').addEventListener('click', ()=>{if(currentPage>1){currentPage--; displayWozow();}});
-document.getElementById('nextPage').addEventListener('click', ()=>{currentPage++; displayWozow();});
-document.querySelector('#lightbox .close').addEventListener('click', ()=>{document.getElementById('lightbox').style.display='none';});
-document.getElementById('lightbox').addEventListener('click', e=>{if(e.target===document.getElementById('lightbox')) document.getElementById('lightbox').style.display='none';});
-document.querySelector('#lightbox .prev').addEventListener('click', ()=>{currentLightboxIndex=(currentLightboxIndex-1+window.wozy.length)%window.wozy.length; showLightbox();});
-document.querySelector('#lightbox .next').addEventListener('click', ()=>{currentLightboxIndex=(currentLightboxIndex+1)%window.wozy.length; showLightbox();});
+document.getElementById('sortBy').addEventListener('change', ()=>{currentPage=1; displayWozow();});
+
+// Lightbox
+const lightbox = document.getElementById('lightbox');
+const lightboxImg = document.getElementById('lightboxImg');
+const lightboxTitle = document.getElementById('lightboxTitle');
+const lightboxDetails = document.getElementById('lightboxDetails');
+
+function openLightbox(index){
+    if(index<0 || index>=filteredWozki.length) return;
+    currentLightboxIndex=index;
+    const w = filteredWozki[index];
+    lightboxImg.src=w.Zdjęcie||'https://via.placeholder.com/400x300?text=Brak+zdjęcia';
+    lightboxTitle.innerHTML = `🚒 ${w.Marka||'-'}`;
+    lightboxDetails.innerHTML = `
+        ID: ${w.ID||'-'}<br>
+        Jednostka: ${w.Jednostka||'-'}<br>
+        Województwo: ${w.Województwo||'-'}<br>
+        Powiat: ${w.Powiat||'-'}<br>
+        Rok: ${w['Rok produkcji']||'-'}<br>
+        Status: <span class="${getStatusClass(w.Status)}">${w.Status||'-'}</span><br>
+        Rejestracja: ${w.Rejestracja||'-'}<br>
+        Inne: ${w.Inne||'-'}
+    `;
+    lightbox.style.display='flex';
+}
+
+document.getElementById('closeLightbox').addEventListener('click', ()=>lightbox.style.display='none');
+document.getElementById('prevBtn').addEventListener('click', ()=>{openLightbox(currentLightboxIndex-1);});
+document.getElementById('nextBtn').addEventListener('click', ()=>{openLightbox(currentLightboxIndex+1);});
 </script>
 
 </body>
 </html>
+
