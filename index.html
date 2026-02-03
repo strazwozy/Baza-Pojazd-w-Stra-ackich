@@ -3,1012 +3,354 @@
 <head>
 <meta charset="UTF-8">
 <title>🚒 Baza wozów strażackich</title>
+
 <style>
-* { box-sizing: border-box; margin:0; padding:0; }
-html, body { width:100%; font-family: Arial; background:#1a1a1a; color:white; padding:20px; }
+body {
+  font-family: Arial, sans-serif;
+  background:#f2f2f2;
+  margin:0;
+  padding:20px;
+}
 
-/* Nagłówek strony */
-h1 { text-align:center; margin-bottom:20px; font-size:32px; }
+h1 {
+  text-align:center;
+  margin-bottom:20px;
+}
 
-/* Formularze filtrów */
+/* ====== GÓRNY PANEL ====== */
+#controls {
+  text-align:center;
+  margin-bottom:15px;
+}
+
 #search, #filterWoj, #sortBy {
-    margin:10px 5px; padding:5px; font-size:16px; border-radius:6px; border:1px solid #ccc;
+  margin:5px;
+  padding:6px;
+  font-size:16px;
+  border-radius:6px;
+  border:1px solid #ccc;
 }
-#sortBy { background:#b30000; color:white; }
 
-/* Lista wozów */
-#lista { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
-.woz { background:#2a2a2a; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items:center; width:200px; box-shadow:0 2px 5px rgba(0,0,0,0.5); cursor:pointer; transition:transform 0.2s; }
-.woz:hover { transform:scale(1.05); }
-.woz img { width:180px; height:120px; object-fit:cover; border-radius:6px; margin-bottom:10px; }
-.woz-info { display:flex; flex-direction: column; gap:3px; text-align:left; width:100%; }
-.woz-info strong { display:inline-block; width:90px; }
-.status { font-weight:bold; }
+#sortBox {
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
 
-/* Stronicowanie */
-#pagination { display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
-.page-btn { padding:8px 12px; border-radius:6px; border:none; cursor:pointer; background:#b30000; color:white; }
-.page-btn.disabled { background:#555; cursor:default; }
+#sortDir {
+  font-size:18px;
+  padding:6px 10px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+  background:#444;
+  color:white;
+}
 
-/* Lightbox pełny ekran */
+#sortDir:hover {
+  background:#666;
+}
+
+/* ====== LISTA ====== */
+#lista {
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  justify-content:center;
+}
+
+.woz {
+  background:white;
+  padding:10px;
+  border-radius:8px;
+  width:200px;
+  box-shadow:0 2px 5px rgba(0,0,0,0.2);
+  cursor:pointer;
+}
+
+.woz img {
+  width:180px;
+  height:120px;
+  object-fit:cover;
+  border-radius:6px;
+  margin-bottom:8px;
+}
+
+.woz-info {
+  font-size:13px;
+}
+
+.status {
+  font-weight:bold;
+}
+
+/* ====== PAGINACJA ====== */
+#pagination {
+  margin:20px 0;
+  text-align:center;
+}
+
+#pagination button {
+  padding:6px 12px;
+  margin:0 4px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+  background:#444;
+  color:white;
+}
+
+#pagination button:disabled {
+  opacity:0.4;
+  cursor:default;
+}
+
+/* ====== LIGHTBOX ====== */
 #lightbox {
-    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.95); justify-content:center; align-items:center; z-index:1000;
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.9);
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
 }
+
 #lightboxContent {
-    background:#1a1a1a;
-    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 8px);
-    display:flex; flex-direction:row; width:95%; max-width:1600px; height:95%; border-radius:15px; overflow:hidden; color:white; position:relative; box-shadow:0 0 20px rgba(0,0,0,0.6);
+  width:95%;
+  height:95%;
+  background:#1a1a1a;
+  display:flex;
+  border-radius:15px;
+  overflow:hidden;
+  color:white;
+  position:relative;
 }
-#lightboxImg { max-width:80%; max-height:100%; object-fit:contain; background:#000; }
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="UTF-8">
-<title>🚒 Baza wozów strażackich</title>
-<style>
-* { box-sizing: border-box; margin:0; padding:0; }
-html, body { width:100%; font-family: Arial; background:#1a1a1a; color:white; padding:20px; }
 
-/* Nagłówek strony */
-h1 { text-align:center; margin-bottom:20px; font-size:32px; }
-
-/* Formularze filtrów */
-#search, #filterWoj, #sortBy {
-    margin:10px 5px; padding:5px; font-size:16px; border-radius:6px; border:1px solid #ccc;
+#lightboxImg {
+  max-width:55%;
+  object-fit:contain;
+  background:black;
 }
-#sortBy { background:#b30000; color:white; }
 
-/* Lista wozów */
-#lista { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
-.woz { background:#2a2a2a; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items:center; width:200px; box-shadow:0 2px 5px rgba(0,0,0,0.5); cursor:pointer; transition:transform 0.2s; }
-.woz:hover { transform:scale(1.05); }
-.woz img { width:180px; height:120px; object-fit:cover; border-radius:6px; margin-bottom:10px; }
-.woz-info { display:flex; flex-direction: column; gap:3px; text-align:left; width:100%; }
-.woz-info strong { display:inline-block; width:90px; }
-.status { font-weight:bold; }
-
-/* Stronicowanie */
-#pagination { display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
-.page-btn { padding:8px 12px; border-radius:6px; border:none; cursor:pointer; background:#b30000; color:white; }
-.page-btn.disabled { background:#555; cursor:default; }
-
-/* Lightbox pełny ekran */
-#lightbox {
-    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.95); justify-content:center; align-items:center; z-index:1000;
+#lightboxInfo {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow-y:auto;
 }
-#lightboxContent {
-    background:#1a1a1a;
-    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 8px);
-    display:flex; flex-direction:row; width:95%; max-width:1600px; height:95%; border-radius:15px; overflow:hidden; color:white; position:relative; box-shadow:0 0 20px rgba(0,0,0,0.6);
+
+#lightboxTitle {
+  background:#e60000;
+  padding:16px;
+  font-size:28px;
+  text-align:center;
 }
-#lightboxImg { max-width:80%; max-height:100%; object-fit:contain; background:#000; }
-#lightboxInfo { flex:1; display:flex; flex-direction:column; overflow-y:auto; background:#1a1a1a; }
-#lightboxTitle { background:#E60000; padding:15px; font-size:28px; text-align:center; width:100%; flex-shrink:0; font-weight:bold; }
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="UTF-8">
-<title>🚒 Baza wozów strażackich</title>
-<style>
-* { box-sizing: border-box; margin:0; padding:0; }
-html, body { width:100%; font-family: Arial; background:#1a1a1a; color:white; padding:20px; }
 
-/* Nagłówek strony */
-h1 { text-align:center; margin-bottom:20px; font-size:32px; }
-
-/* Formularze filtrów */
-#search, #filterWoj, #sortBy {
-    margin:10px 5px; padding:5px; font-size:16px; border-radius:6px; border:1px solid #ccc;
+#lightboxDetails {
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  font-size:17px;
 }
-#sortBy { background:#b30000; color:white; }
 
-/* Lista wozów */
-#lista { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
-.woz { background:#2a2a2a; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items:center; width:200px; box-shadow:0 2px 5px rgba(0,0,0,0.5); cursor:pointer; transition:transform 0.2s; }
-.woz:hover { transform:scale(1.05); }
-.woz img { width:180px; height:120px; object-fit:cover; border-radius:6px; margin-bottom:10px; }
-.woz-info { display:flex; flex-direction: column; gap:3px; text-align:left; width:100%; }
-.woz-info strong { display:inline-block; width:90px; }
-.status { font-weight:bold; }
-
-/* Stronicowanie */
-#pagination { display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
-.page-btn { padding:8px 12px; border-radius:6px; border:none; cursor:pointer; background:#b30000; color:white; }
-.page-btn.disabled { background:#555; cursor:default; }
-
-/* Lightbox pełny ekran */
-#lightbox {
-    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.95); justify-content:center; align-items:center; z-index:1000;
+.detail-row {
+  display:flex;
+  gap:15px;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+  padding-bottom:6px;
 }
-#lightboxContent {
-    background:#1a1a1a;
-    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 8px);
-    display:flex; flex-direction:row; width:95%; max-width:1600px; height:95%; border-radius:15px; overflow:hidden; color:white; position:relative; box-shadow:0 0 20px rgba(0,0,0,0.6);
+
+.detail-label {
+  min-width:160px;
+  font-weight:bold;
 }
-#lightboxImg { max-width:80%; max-height:100%; object-fit:contain; background:#000; }
-#lightboxInfo { flex:1; display:flex; flex-direction:column; overflow-y:auto; background:#1a1a1a; }
-#lightboxTitle { background:#E60000; padding:15px; font-size:28px; text-align:center; width:100%; flex-shrink:0; font-weight:bold; }
-#lightboxDetails { padding:15px; flex:1; font-size:16px; display:flex; flex-direction:column; gap:8px; overflow-y:auto; }
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-<meta charset="UTF-8">
-<title>🚒 Baza wozów strażackich</title>
-<style>
-* { box-sizing: border-box; margin:0; padding:0; }
-html, body { width:100%; font-family: Arial; background:#1a1a1a; color:white; padding:20px; }
 
-/* Nagłówek strony */
-h1 { text-align:center; margin-bottom:20px; font-size:32px; }
-
-/* Formularze filtrów */
-#search, #filterWoj, #sortBy {
-    margin:10px 5px; padding:5px; font-size:16px; border-radius:6px; border:1px solid #ccc;
+#closeLightbox {
+  position:absolute;
+  top:10px;
+  right:15px;
+  font-size:32px;
+  color:white;
+  background:none;
+  border:none;
+  cursor:pointer;
 }
-#sortBy { background:#b30000; color:white; }
 
-/* Lista wozów */
-#lista { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
-.woz { background:#2a2a2a; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items:center; width:200px; box-shadow:0 2px 5px rgba(0,0,0,0.5); cursor:pointer; transition:transform 0.2s; }
-.woz:hover { transform:scale(1.05); }
-.woz img { width:180px; height:120px; object-fit:cover; border-radius:6px; margin-bottom:10px; }
-.woz-info { display:flex; flex-direction: column; gap:3px; text-align:left; width:100%; }
-.woz-info strong { display:inline-block; width:90px; }
-.status { font-weight:bold; }
-
-/* Stronicowanie */
-#pagination { display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
-.page-btn { padding:8px 12px; border-radius:6px; border:none; cursor:pointer; background:#b30000; color:white; }
-.page-btn.disabled { background:#555; cursor:default; }
-
-/* Lightbox pełny ekran */
-#lightbox {
-    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
-    background: rgba(0,0,0,0.95); justify-content:center; align-items:center; z-index:1000;
+#prevBtn, #nextBtn {
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:50px;
+  background:rgba(0,0,0,0.4);
+  color:white;
+  border:none;
+  padding:20px;
+  cursor:pointer;
+  border-radius:50%;
 }
-#lightboxContent {
-    background:#1a1a1a;
-    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 8px);
-    display:flex; flex-direction:row; width:95%; max-width:1600px; height:95%; border-radius:15px; overflow:hidden; color:white; position:relative; box-shadow:0 0 20px rgba(0,0,0,0.6);
-}
-#lightboxImg { max-width:80%; max-height:100%; object-fit:contain; background:#000; }
-#lightboxInfo { flex:1; display:flex; flex-direction:column; overflow-y:auto; background:#1a1a1a; }
-#lightboxTitle { background:#E60000; padding:15px; font-size:28px; text-align:center; width:100%; flex-shrink:0; font-weight:bold; }
-#lightboxDetails { padding:15px; flex:1; font-size:16px; display:flex; flex-direction:column; gap:8px; overflow-y:auto; }
-.detail-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.2); }
-.detail-label { font-weight:bold; min-width:130px; }
-.detail-value { flex-grow:1; }
 
-/* Lightbox przyciski */
-#closeLightbox { position:absolute; top:10px; right:15px; font-size:32px; font-weight:bold; color:white; background:none; border:none; cursor:pointer; z-index:1001; }
-#prevBtn, #nextBtn { position:absolute; top:50%; transform:translateY(-50%); font-size:50px; color:white; background: rgba(0,0,0,0.4); border:none; padding:20px; cursor:pointer; border-radius:50%; z-index:1001; }
-#prevBtn { left:10px; } #nextBtn { right:10px; }
+#prevBtn { left:10px; }
+#nextBtn { right:10px; }
 
-/* Responsywność */
-@media (max-width:1000px){
-  #lightboxContent { flex-direction: column; width:95%; height:90%; }
-  #lightboxImg { max-width:100%; max-height:50%; }
-  #prevBtn, #nextBtn { font-size:30px; padding:10px; }
-  #lista { flex-direction:column; align-items:center; }
+/* ====== MOBILE ====== */
+@media(max-width:900px){
+  #lightboxContent {
+    flex-direction:column;
+  }
+  #lightboxImg {
+    max-width:100%;
+    max-height:50%;
+  }
 }
 </style>
 </head>
+
 <body>
 
 <h1>🚒 Baza wozów strażackich w Polsce</h1>
 
-<input type="text" id="search" placeholder="Szukaj jednostki, ID, rejestracji, marki...">
-<select id="filterWoj">
-  <option value="">Wszystkie województwa</option>
-  <option value="Małopolskie">Małopolskie</option>
-  <option value="Mazowieckie">Mazowieckie</option>
-  <option value="Pomorskie">Pomorskie</option>
-  <option value="Wielkopolskie">Wielkopolskie</option>
-  <option value="Dolnośląskie">Dolnośląskie</option>
-  <option value="Śląskie">Śląskie</option>
-  <option value="Łódzkie">Łódzkie</option>
-  <option value="Lubelskie">Lubelskie</option>
-  <option value="Lubuskie">Lubuskie</option>
-  <option value="Opolskie">Opolskie</option>
-  <option value="Podkarpackie">Podkarpackie</option>
-  <option value="Podlaskie">Podlaskie</option>
-  <option value="Świętokrzyskie">Świętokrzyskie</option>
-  <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
-  <option value="Zachodniopomorskie">Zachodniopomorskie</option>
-</select>
+<div id="controls">
+  <input type="text" id="search" placeholder="Szukaj...">
 
-<select id="sortBy">
-  <option value="ID">Sortuj po ID</option>
-  <option value="Jednostka">Sortuj po Jednostce</option>
-  <option value="Marka">Sortuj po Marce</option>
-  <option value="Rejestracja">Sortuj po Rejestracji</option>
-  <option value="Rok produkcji">Sortuj po Roku</option>
-</select>
+  <select id="filterWoj">
+    <option value="">Wszystkie województwa</option>
+    <option>Mazowieckie</option>
+    <option>Małopolskie</option>
+    <option>Śląskie</option>
+    <option>Pomorskie</option>
+  </select>
+
+  <div id="sortBox">
+    <select id="sortBy">
+      <option value="ID">ID</option>
+      <option value="Jednostka">Jednostka</option>
+      <option value="Marka">Marka</option>
+      <option value="Rejestracja">Rejestracja</option>
+      <option value="Rok produkcji">Rok produkcji</option>
+    </select>
+    <button id="sortDir">⬆</button>
+  </div>
+</div>
 
 <div id="lista"></div>
-<div id="pagination"></div>
 
-<!-- Lightbox -->
+<div id="pagination">
+  <button id="prevPage">← Poprzednia</button>
+  <span id="pageInfo"></span>
+  <button id="nextPage">Następna →</button>
+</div>
+
+<!-- LIGHTBOX -->
 <div id="lightbox">
-  <button id="prevBtn">&#8592;</button>
+  <button id="prevBtn">←</button>
   <div id="lightboxContent">
-      <span id="closeLightbox">&times;</span>
-      <img id="lightboxImg" src="">
-      <div id="lightboxInfo">
-          <h2 id="lightboxTitle">Marka</h2>
-          <div id="lightboxDetails"></div>
-      </div>
+    <button id="closeLightbox">×</button>
+    <img id="lightboxImg">
+    <div id="lightboxInfo">
+      <div id="lightboxTitle"></div>
+      <div id="lightboxDetails"></div>
+    </div>
   </div>
-  <button id="nextBtn">&#8594;</button>
+  <button id="nextBtn">→</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
 const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
-let currentPage = 1;
-const itemsPerPage = 80;
-let filteredWozki = [];
-let lightboxIndex = 0;
 
-Papa.parse(csvUrl, { download:true, header:true, skipEmptyLines:true, complete:function(results){
-    window.wozy = results.data;
-    window.wozy.sort((a,b)=>Number(a.ID)-Number(b.ID));
-    displayWozow();
-}});
+let wozy = [];
+let filtered = [];
+let page = 1;
+const perPage = 80;
+let sortDir = 'asc';
+let lbIndex = 0;
 
-function getStatusColor(status){
-    if(!status) return 'white';
-    const s=status.toLowerCase();
-    if(s==='czynny') return 'green';
-    if(['wycofany ze służby','sprzedany','rozbity','spłonął'].includes(s)) return 'red';
-    if(s==='przeniesiony') return 'yellow';
-    if(s==='obiekt muzeum') return 'blue';
-    if(s==='porzucony') return 'orange';
-    return 'white';
-}
-
-function displayWozow(){
-    const lista=document.getElementById('lista');
-    const pagination=document.getElementById('pagination');
-    const search=document.getElementById('search').value.toLowerCase();
-    const wojFilter=document.getElementById('filterWoj').value;
-    const sortBy=document.getElementById('sortBy').value;
-    lista.innerHTML='';
-    pagination.innerHTML='';
-
-    window.wozy.sort((a,b)=>{
-        let valA=a[sortBy]||''; let valB=b[sortBy]||'';
-        if(sortBy==='ID') return Number(valA)-Number(valB);
-        return valA.toString().localeCompare(valB.toString());
-    });
-
-    filteredWozki = window.wozy.filter(w=>{
-        return (
-            (w.Jednostka && w.Jednostka.toLowerCase().includes(search)) ||
-            (w.ID && w.ID.toString().includes(search)) ||
-            (w.Rejestracja && w.Rejestracja.toLowerCase().includes(search)) ||
-            (w.Marka && w.Marka.toLowerCase().includes(search))
-        ) && (wojFilter==='' || w.Województwo===wojFilter);
-    });
-
-    const totalPages=Math.ceil(filteredWozki.length/itemsPerPage);
-    if(currentPage>totalPages) currentPage=totalPages || 1;
-
-    const start=(currentPage-1)*itemsPerPage;
-    const end=start+itemsPerPage;
-    const pageItems=filteredWozki.slice(start,end);
-
-    pageItems.forEach((w,i)=>{
-        const div=document.createElement('div');
-        div.className='woz';
-        div.innerHTML=`
-            <img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}" alt="${w.Jednostka}">
-            <div class="woz-info">
-                <strong>ID:</strong> ${w.ID||'-'}
-                <strong>Jednostka:</strong> ${w.Jednostka||'-'}
-                <strong>Województwo:</strong> ${w.Województwo||'-'}
-                <strong>Powiat:</strong> ${w.Powiat||'-'}
-                <strong>Marka:</strong> ${w.Marka||'-'}
-                <strong>Rok:</strong> ${w['Rok produkcji']||'-'}
-                <strong>Status:</strong> <span class="status" style="color:${getStatusColor(w.Status)}">${w.Status||'-'}</span>
-                <strong>Rejestracja:</strong> ${w.Rejestracja||'-'}
-                <strong>Inne:</strong> ${w.Inne||'-'}
-            </div>
-        `;
-        lista.appendChild(div);
-        div.addEventListener('click',()=>openLightbox(start+i));
-    });
-
-    // Stronicowanie
-    if(totalPages>1){
-        const prev=document.createElement('button'); prev.textContent='Prev'; prev.className='page-btn'; prev.disabled=currentPage===1; if(currentPage===1) prev.classList.add('disabled');
-        prev.addEventListener('click',()=>{ currentPage--; displayWozow(); });
-        pagination.appendChild(prev);
-
-        for(let p=1;p<=totalPages;p++){
-            const btn=document.createElement('button');
-            btn.textContent=p; btn.className='page-btn'; if(p===currentPage) btn.classList.add('disabled');
-            btn.addEventListener('click',()=>{ currentPage=p; displayWozow(); });
-            pagination.appendChild(btn);
-        }
-
-        const next=document.createElement('button'); next.textContent='Next'; next.className='page-btn'; next.disabled=currentPage===totalPages; if(currentPage===totalPages) next.classList.add('disabled');
-        next.addEventListener('click',()=>{ currentPage++; displayWozow(); });
-        pagination.appendChild(next);
-    }
-}
-
-document.getElementById('search').addEventListener('input',()=>{ currentPage=1; displayWozow(); });
-document.getElementById('filterWoj').addEventListener('change',()=>{ currentPage=1; displayWozow(); });
-document.getElementById('sortBy').addEventListener('change',()=>{ displayWozow(); });
-
-// Lightbox
-const lightbox=document.getElementById('lightbox');
-const lbImg=document.getElementById('lightboxImg');
-const lbTitle=document.getElementById('lightboxTitle');
-const lbDetails=document.getElementById('lightboxDetails');
-const closeBtn=document.getElementById('closeLightbox');
-const prevBtn=document.getElementById('prevBtn');
-const nextBtn=document.getElementById('nextBtn');
-
-function openLightbox(idx){
-    lightboxIndex=idx;
-    if(lightboxIndex<0) lightboxIndex=filteredWozki.length-1;
-    if(lightboxIndex>=filteredWozki.length) lightboxIndex=0;
-    const w=filteredWozki[lightboxIndex];
-    lbImg.src=w.Zdjęcie||'https://via.placeholder.com/800x600?text=Brak+zdjęcia';
-    lbTitle.textContent=w.Marka||'-';
-    lbDetails.innerHTML='';
-    const fields=['ID','Jednostka','Województwo','Powiat','Rok produkcji','Status','Rejestracja','Inne'];
-    fields.forEach(f=>{
-        const row=document.createElement('div'); row.className='detail-row';
-        row.innerHTML=`<div class="detail-label">${f}:</div><div class="detail-value" style="color:${f==='Status'?getStatusColor(w[f]):'white'}">${w[f]||'-'}</div>`;
-        lbDetails.appendChild(row);
-    });
-    lightbox.style.display='flex';
-}
-
-closeBtn.addEventListener('click',()=>lightbox.style.display='none');
-prevBtn.addEventListener('click',()=>{ openLightbox(lightboxIndex-1); });
-nextBtn.addEventListener('click',()=>{ openLightbox(lightboxIndex+1); });
-
-// Obsługa klawiatury
-document.addEventListener('keydown',e=>{
-    if(lightbox.style.display==='flex'){
-        if(e.key==='ArrowLeft') openLightbox(lightboxIndex-1);
-        if(e.key==='ArrowRight') openLightbox(lightboxIndex+1);
-        if(e.key==='Escape') lightbox.style.display='none';
-    }
+Papa.parse(csvUrl,{
+  download:true,
+  header:true,
+  complete:r=>{
+    wozy = r.data;
+    render();
+  }
 });
+
+function render(){
+  const search = searchInput.value.toLowerCase();
+  const woj = filterWoj.value;
+  const sort = sortBy.value;
+
+  filtered = wozy.filter(w =>
+    (!woj || w.Województwo===woj) &&
+    JSON.stringify(w).toLowerCase().includes(search)
+  );
+
+  filtered.sort((a,b)=>{
+    let A=a[sort]||'', B=b[sort]||'';
+    if(sort==='ID'||sort==='Rok produkcji'){
+      A=+A||0; B=+B||0;
+      return sortDir==='asc'?A-B:B-A;
+    }
+    return sortDir==='asc'
+      ? A.localeCompare(B)
+      : B.localeCompare(A);
+  });
+
+  const start=(page-1)*perPage;
+  const items=filtered.slice(start,start+perPage);
+
+  lista.innerHTML='';
+  items.forEach((w,i)=>{
+    const d=document.createElement('div');
+    d.className='woz';
+    d.innerHTML=`
+      <img src="${w.Zdjęcie||'https://via.placeholder.com/180x120'}">
+      <div class="woz-info">
+        <b>ID:</b> ${w.ID}<br>
+        <b>Jednostka:</b> ${w.Jednostka}<br>
+        <b>Marka:</b> ${w.Marka}
+      </div>`;
+    d.onclick=()=>openLB(start+i);
+    lista.appendChild(d);
+  });
+
+  pageInfo.textContent = `Strona ${page} / ${Math.ceil(filtered.length/perPage)}`;
+  prevPage.disabled = page===1;
+  nextPage.disabled = page>=Math.ceil(filtered.length/perPage);
+}
+
+function openLB(i){
+  lbIndex=i;
+  const w=filtered[i];
+  lightboxImg.src=w.Zdjęcie;
+  lightboxTitle.textContent=w.Marka;
+  lightboxDetails.innerHTML='';
+  Object.entries(w).forEach(([k,v])=>{
+    const r=document.createElement('div');
+    r.className='detail-row';
+    r.innerHTML=`<div class="detail-label">${k}</div><div>${v||'-'}</div>`;
+    lightboxDetails.appendChild(r);
+  });
+  lightbox.style.display='flex';
+}
+
+searchInput.oninput=()=>{page=1;render();}
+filterWoj.onchange=()=>{page=1;render();}
+sortBy.onchange=render;
+sortDir.onclick=()=>{
+  sortDir.textContent = sortDir.textContent==='⬆'?'⬇':'⬆';
+  sortDir = sortDir==='asc'?'desc':'asc';
+  render();
+};
+
+prevPage.onclick=()=>{page--;render();}
+nextPage.onclick=()=>{page++;render();}
+closeLightbox.onclick=()=>lightbox.style.display='none';
+prevBtn.onclick=()=>openLB((lbIndex-1+filtered.length)%filtered.length);
+nextBtn.onclick=()=>openLB((lbIndex+1)%filtered.length);
 </script>
+
 </body>
 </html>
 
-
-/* Lightbox przyciski */
-#closeLightbox { position:absolute; top:10px; right:15px; font-size:32px; font-weight:bold; color:white; background:none; border:none; cursor:pointer; z-index:1001; }
-#prevBtn, #nextBtn { position:absolute; top:50%; transform:translateY(-50%); font-size:50px; color:white; background: rgba(0,0,0,0.4); border:none; padding:20px; cursor:pointer; border-radius:50%; z-index:1001; }
-#prevBtn { left:10px; } #nextBtn { right:10px; }
-
-/* Responsywność */
-@media (max-width:1000px){
-  #lightboxContent { flex-direction: column; width:95%; height:90%; }
-  #lightboxImg { max-width:100%; max-height:50%; }
-  #prevBtn, #nextBtn { font-size:30px; padding:10px; }
-  #lista { flex-direction:column; align-items:center; }
-}
-</style>
-</head>
-<body>
-
-<h1>🚒 Baza wozów strażackich w Polsce</h1>
-
-<input type="text" id="search" placeholder="Szukaj jednostki, ID, rejestracji, marki...">
-<select id="filterWoj">
-  <option value="">Wszystkie województwa</option>
-  <option value="Małopolskie">Małopolskie</option>
-  <option value="Mazowieckie">Mazowieckie</option>
-  <option value="Pomorskie">Pomorskie</option>
-  <option value="Wielkopolskie">Wielkopolskie</option>
-  <option value="Dolnośląskie">Dolnośląskie</option>
-  <option value="Śląskie">Śląskie</option>
-  <option value="Łódzkie">Łódzkie</option>
-  <option value="Lubelskie">Lubelskie</option>
-  <option value="Lubuskie">Lubuskie</option>
-  <option value="Opolskie">Opolskie</option>
-  <option value="Podkarpackie">Podkarpackie</option>
-  <option value="Podlaskie">Podlaskie</option>
-  <option value="Świętokrzyskie">Świętokrzyskie</option>
-  <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
-  <option value="Zachodniopomorskie">Zachodniopomorskie</option>
-</select>
-
-<select id="sortBy">
-  <option value="ID">Sortuj po ID</option>
-  <option value="Jednostka">Sortuj po Jednostce</option>
-  <option value="Marka">Sortuj po Marce</option>
-  <option value="Rejestracja">Sortuj po Rejestracji</option>
-  <option value="Rok produkcji">Sortuj po Roku</option>
-</select>
-
-<div id="lista"></div>
-<div id="pagination"></div>
-
-<!-- Lightbox -->
-<div id="lightbox">
-  <button id="prevBtn">&#8592;</button>
-  <div id="lightboxContent">
-      <span id="closeLightbox">&times;</span>
-      <img id="lightboxImg" src="">
-      <div id="lightboxInfo">
-          <h2 id="lightboxTitle">Marka</h2>
-          <div id="lightboxDetails"></div>
-      </div>
-  </div>
-  <button id="nextBtn">&#8594;</button>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-<script>
-const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
-let currentPage = 1;
-const itemsPerPage = 80;
-let filteredWozki = [];
-let lightboxIndex = 0;
-
-Papa.parse(csvUrl, { download:true, header:true, skipEmptyLines:true, complete:function(results){
-    window.wozy = results.data;
-    window.wozy.sort((a,b)=>Number(a.ID)-Number(b.ID));
-    displayWozow();
-}});
-
-function getStatusColor(status){
-    if(!status) return 'white';
-    const s=status.toLowerCase();
-    if(s==='czynny') return 'green';
-    if(['wycofany ze służby','sprzedany','rozbity','spłonął'].includes(s)) return 'red';
-    if(s==='przeniesiony') return 'yellow';
-    if(s==='obiekt muzeum') return 'blue';
-    if(s==='porzucony') return 'orange';
-    return 'white';
-}
-
-function displayWozow(){
-    const lista=document.getElementById('lista');
-    const pagination=document.getElementById('pagination');
-    const search=document.getElementById('search').value.toLowerCase();
-    const wojFilter=document.getElementById('filterWoj').value;
-    const sortBy=document.getElementById('sortBy').value;
-    lista.innerHTML='';
-    pagination.innerHTML='';
-
-    window.wozy.sort((a,b)=>{
-        let valA=a[sortBy]||''; let valB=b[sortBy]||'';
-        if(sortBy==='ID') return Number(valA)-Number(valB);
-        return valA.toString().localeCompare(valB.toString());
-    });
-
-    filteredWozki = window.wozy.filter(w=>{
-        return (
-            (w.Jednostka && w.Jednostka.toLowerCase().includes(search)) ||
-            (w.ID && w.ID.toString().includes(search)) ||
-            (w.Rejestracja && w.Rejestracja.toLowerCase().includes(search)) ||
-            (w.Marka && w.Marka.toLowerCase().includes(search))
-        ) && (wojFilter==='' || w.Województwo===wojFilter);
-    });
-
-    const totalPages=Math.ceil(filteredWozki.length/itemsPerPage);
-    if(currentPage>totalPages) currentPage=totalPages || 1;
-
-    const start=(currentPage-1)*itemsPerPage;
-    const end=start+itemsPerPage;
-    const pageItems=filteredWozki.slice(start,end);
-
-    pageItems.forEach((w,i)=>{
-        const div=document.createElement('div');
-        div.className='woz';
-        div.innerHTML=`
-            <img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}" alt="${w.Jednostka}">
-            <div class="woz-info">
-                <strong>ID:</strong> ${w.ID||'-'}
-                <strong>Jednostka:</strong> ${w.Jednostka||'-'}
-                <strong>Województwo:</strong> ${w.Województwo||'-'}
-                <strong>Powiat:</strong> ${w.Powiat||'-'}
-                <strong>Marka:</strong> ${w.Marka||'-'}
-                <strong>Rok:</strong> ${w['Rok produkcji']||'-'}
-                <strong>Status:</strong> <span class="status" style="color:${getStatusColor(w.Status)}">${w.Status||'-'}</span>
-                <strong>Rejestracja:</strong> ${w.Rejestracja||'-'}
-                <strong>Inne:</strong> ${w.Inne||'-'}
-            </div>
-        `;
-        lista.appendChild(div);
-        div.addEventListener('click',()=>openLightbox(start+i));
-    });
-
-    // Stronicowanie
-    if(totalPages>1){
-        const prev=document.createElement('button'); prev.textContent='Prev'; prev.className='page-btn'; prev.disabled=currentPage===1; if(currentPage===1) prev.classList.add('disabled');
-        prev.addEventListener('click',()=>{ currentPage--; displayWozow(); });
-        pagination.appendChild(prev);
-
-        for(let p=1;p<=totalPages;p++){
-            const btn=document.createElement('button');
-            btn.textContent=p; btn.className='page-btn'; if(p===currentPage) btn.classList.add('disabled');
-            btn.addEventListener('click',()=>{ currentPage=p; displayWozow(); });
-            pagination.appendChild(btn);
-        }
-
-        const next=document.createElement('button'); next.textContent='Next'; next.className='page-btn'; next.disabled=currentPage===totalPages; if(currentPage===totalPages) next.classList.add('disabled');
-        next.addEventListener('click',()=>{ currentPage++; displayWozow(); });
-        pagination.appendChild(next);
-    }
-}
-
-document.getElementById('search').addEventListener('input',()=>{ currentPage=1; displayWozow(); });
-document.getElementById('filterWoj').addEventListener('change',()=>{ currentPage=1; displayWozow(); });
-document.getElementById('sortBy').addEventListener('change',()=>{ displayWozow(); });
-
-// Lightbox
-const lightbox=document.getElementById('lightbox');
-const lbImg=document.getElementById('lightboxImg');
-const lbTitle=document.getElementById('lightboxTitle');
-const lbDetails=document.getElementById('lightboxDetails');
-const closeBtn=document.getElementById('closeLightbox');
-const prevBtn=document.getElementById('prevBtn');
-const nextBtn=document.getElementById('nextBtn');
-
-function openLightbox(idx){
-    lightboxIndex=idx;
-    if(lightboxIndex<0) lightboxIndex=filteredWozki.length-1;
-    if(lightboxIndex>=filteredWozki.length) lightboxIndex=0;
-    const w=filteredWozki[lightboxIndex];
-    lbImg.src=w.Zdjęcie||'https://via.placeholder.com/800x600?text=Brak+zdjęcia';
-    lbTitle.textContent=w.Marka||'-';
-    lbDetails.innerHTML='';
-    const fields=['ID','Jednostka','Województwo','Powiat','Rok produkcji','Status','Rejestracja','Inne'];
-    fields.forEach(f=>{
-        const row=document.createElement('div'); row.className='detail-row';
-        row.innerHTML=`<div class="detail-label">${f}:</div><div class="detail-value" style="color:${f==='Status'?getStatusColor(w[f]):'white'}">${w[f]||'-'}</div>`;
-        lbDetails.appendChild(row);
-    });
-    lightbox.style.display='flex';
-}
-
-closeBtn.addEventListener('click',()=>lightbox.style.display='none');
-prevBtn.addEventListener('click',()=>{ openLightbox(lightboxIndex-1); });
-nextBtn.addEventListener('click',()=>{ openLightbox(lightboxIndex+1); });
-
-// Obsługa klawiatury
-document.addEventListener('keydown',e=>{
-    if(lightbox.style.display==='flex'){
-        if(e.key==='ArrowLeft') openLightbox(lightboxIndex-1);
-        if(e.key==='ArrowRight') openLightbox(lightboxIndex+1);
-        if(e.key==='Escape') lightbox.style.display='none';
-    }
-});
-</script>
-</body>
-</html>
-
-.detail-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.2); }
-.detail-label { font-weight:bold; min-width:130px; }
-.detail-value { flex-grow:1; }
-
-/* Lightbox przyciski */
-#closeLightbox { position:absolute; top:10px; right:15px; font-size:32px; font-weight:bold; color:white; background:none; border:none; cursor:pointer; z-index:1001; }
-#prevBtn, #nextBtn { position:absolute; top:50%; transform:translateY(-50%); font-size:50px; color:white; background: rgba(0,0,0,0.4); border:none; padding:20px; cursor:pointer; border-radius:50%; z-index:1001; }
-#prevBtn { left:10px; } #nextBtn { right:10px; }
-
-/* Responsywność */
-@media (max-width:1000px){
-  #lightboxContent { flex-direction: column; width:95%; height:90%; }
-  #lightboxImg { max-width:100%; max-height:50%; }
-  #prevBtn, #nextBtn { font-size:30px; padding:10px; }
-  #lista { flex-direction:column; align-items:center; }
-}
-</style>
-</head>
-<body>
-
-<h1>🚒 Baza wozów strażackich w Polsce</h1>
-
-<input type="text" id="search" placeholder="Szukaj jednostki, ID, rejestracji, marki...">
-<select id="filterWoj">
-  <option value="">Wszystkie województwa</option>
-  <option value="Małopolskie">Małopolskie</option>
-  <option value="Mazowieckie">Mazowieckie</option>
-  <option value="Pomorskie">Pomorskie</option>
-  <option value="Wielkopolskie">Wielkopolskie</option>
-  <option value="Dolnośląskie">Dolnośląskie</option>
-  <option value="Śląskie">Śląskie</option>
-  <option value="Łódzkie">Łódzkie</option>
-  <option value="Lubelskie">Lubelskie</option>
-  <option value="Lubuskie">Lubuskie</option>
-  <option value="Opolskie">Opolskie</option>
-  <option value="Podkarpackie">Podkarpackie</option>
-  <option value="Podlaskie">Podlaskie</option>
-  <option value="Świętokrzyskie">Świętokrzyskie</option>
-  <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
-  <option value="Zachodniopomorskie">Zachodniopomorskie</option>
-</select>
-
-<select id="sortBy">
-  <option value="ID">Sortuj po ID</option>
-  <option value="Jednostka">Sortuj po Jednostce</option>
-  <option value="Marka">Sortuj po Marce</option>
-  <option value="Rejestracja">Sortuj po Rejestracji</option>
-  <option value="Rok produkcji">Sortuj po Roku</option>
-</select>
-
-<div id="lista"></div>
-<div id="pagination"></div>
-
-<!-- Lightbox -->
-<div id="lightbox">
-  <button id="prevBtn">&#8592;</button>
-  <div id="lightboxContent">
-      <span id="closeLightbox">&times;</span>
-      <img id="lightboxImg" src="">
-      <div id="lightboxInfo">
-          <h2 id="lightboxTitle">Marka</h2>
-          <div id="lightboxDetails"></div>
-      </div>
-  </div>
-  <button id="nextBtn">&#8594;</button>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-<script>
-const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
-let currentPage = 1;
-const itemsPerPage = 80;
-let filteredWozki = [];
-let lightboxIndex = 0;
-
-Papa.parse(csvUrl, { download:true, header:true, skipEmptyLines:true, complete:function(results){
-    window.wozy = results.data;
-    window.wozy.sort((a,b)=>Number(a.ID)-Number(b.ID));
-    displayWozow();
-}});
-
-function getStatusColor(status){
-    if(!status) return 'white';
-    const s=status.toLowerCase();
-    if(s==='czynny') return 'green';
-    if(['wycofany ze służby','sprzedany','rozbity','spłonął'].includes(s)) return 'red';
-    if(s==='przeniesiony') return 'yellow';
-    if(s==='obiekt muzeum') return 'blue';
-    if(s==='porzucony') return 'orange';
-    return 'white';
-}
-
-function displayWozow(){
-    const lista=document.getElementById('lista');
-    const pagination=document.getElementById('pagination');
-    const search=document.getElementById('search').value.toLowerCase();
-    const wojFilter=document.getElementById('filterWoj').value;
-    const sortBy=document.getElementById('sortBy').value;
-    lista.innerHTML='';
-    pagination.innerHTML='';
-
-    window.wozy.sort((a,b)=>{
-        let valA=a[sortBy]||''; let valB=b[sortBy]||'';
-        if(sortBy==='ID') return Number(valA)-Number(valB);
-        return valA.toString().localeCompare(valB.toString());
-    });
-
-    filteredWozki = window.wozy.filter(w=>{
-        return (
-            (w.Jednostka && w.Jednostka.toLowerCase().includes(search)) ||
-            (w.ID && w.ID.toString().includes(search)) ||
-            (w.Rejestracja && w.Rejestracja.toLowerCase().includes(search)) ||
-            (w.Marka && w.Marka.toLowerCase().includes(search))
-        ) && (wojFilter==='' || w.Województwo===wojFilter);
-    });
-
-    const totalPages=Math.ceil(filteredWozki.length/itemsPerPage);
-    if(currentPage>totalPages) currentPage=totalPages || 1;
-
-    const start=(currentPage-1)*itemsPerPage;
-    const end=start+itemsPerPage;
-    const pageItems=filteredWozki.slice(start,end);
-
-    pageItems.forEach((w,i)=>{
-        const div=document.createElement('div');
-        div.className='woz';
-        div.innerHTML=`
-            <img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}" alt="${w.Jednostka}">
-            <div class="woz-info">
-                <strong>ID:</strong> ${w.ID||'-'}
-                <strong>Jednostka:</strong> ${w.Jednostka||'-'}
-                <strong>Województwo:</strong> ${w.Województwo||'-'}
-                <strong>Powiat:</strong> ${w.Powiat||'-'}
-                <strong>Marka:</strong> ${w.Marka||'-'}
-                <strong>Rok:</strong> ${w['Rok produkcji']||'-'}
-                <strong>Status:</strong> <span class="status" style="color:${getStatusColor(w.Status)}">${w.Status||'-'}</span>
-                <strong>Rejestracja:</strong> ${w.Rejestracja||'-'}
-                <strong>Inne:</strong> ${w.Inne||'-'}
-            </div>
-        `;
-        lista.appendChild(div);
-        div.addEventListener('click',()=>openLightbox(start+i));
-    });
-
-    // Stronicowanie
-    if(totalPages>1){
-        const prev=document.createElement('button'); prev.textContent='Prev'; prev.className='page-btn'; prev.disabled=currentPage===1; if(currentPage===1) prev.classList.add('disabled');
-        prev.addEventListener('click',()=>{ currentPage--; displayWozow(); });
-        pagination.appendChild(prev);
-
-        for(let p=1;p<=totalPages;p++){
-            const btn=document.createElement('button');
-            btn.textContent=p; btn.className='page-btn'; if(p===currentPage) btn.classList.add('disabled');
-            btn.addEventListener('click',()=>{ currentPage=p; displayWozow(); });
-            pagination.appendChild(btn);
-        }
-
-        const next=document.createElement('button'); next.textContent='Next'; next.className='page-btn'; next.disabled=currentPage===totalPages; if(currentPage===totalPages) next.classList.add('disabled');
-        next.addEventListener('click',()=>{ currentPage++; displayWozow(); });
-        pagination.appendChild(next);
-    }
-}
-
-document.getElementById('search').addEventListener('input',()=>{ currentPage=1; displayWozow(); });
-document.getElementById('filterWoj').addEventListener('change',()=>{ currentPage=1; displayWozow(); });
-document.getElementById('sortBy').addEventListener('change',()=>{ displayWozow(); });
-
-// Lightbox
-const lightbox=document.getElementById('lightbox');
-const lbImg=document.getElementById('lightboxImg');
-const lbTitle=document.getElementById('lightboxTitle');
-const lbDetails=document.getElementById('lightboxDetails');
-const closeBtn=document.getElementById('closeLightbox');
-const prevBtn=document.getElementById('prevBtn');
-const nextBtn=document.getElementById('nextBtn');
-
-function openLightbox(idx){
-    lightboxIndex=idx;
-    if(lightboxIndex<0) lightboxIndex=filteredWozki.length-1;
-    if(lightboxIndex>=filteredWozki.length) lightboxIndex=0;
-    const w=filteredWozki[lightboxIndex];
-    lbImg.src=w.Zdjęcie||'https://via.placeholder.com/800x600?text=Brak+zdjęcia';
-    lbTitle.textContent=w.Marka||'-';
-    lbDetails.innerHTML='';
-    const fields=['ID','Jednostka','Województwo','Powiat','Rok produkcji','Status','Rejestracja','Inne'];
-    fields.forEach(f=>{
-        const row=document.createElement('div'); row.className='detail-row';
-        row.innerHTML=`<div class="detail-label">${f}:</div><div class="detail-value" style="color:${f==='Status'?getStatusColor(w[f]):'white'}">${w[f]||'-'}</div>`;
-        lbDetails.appendChild(row);
-    });
-    lightbox.style.display='flex';
-}
-
-closeBtn.addEventListener('click',()=>lightbox.style.display='none');
-prevBtn.addEventListener('click',()=>{ openLightbox(lightboxIndex-1); });
-nextBtn.addEventListener('click',()=>{ openLightbox(lightboxIndex+1); });
-
-// Obsługa klawiatury
-document.addEventListener('keydown',e=>{
-    if(lightbox.style.display==='flex'){
-        if(e.key==='ArrowLeft') openLightbox(lightboxIndex-1);
-        if(e.key==='ArrowRight') openLightbox(lightboxIndex+1);
-        if(e.key==='Escape') lightbox.style.display='none';
-    }
-});
-</script>
-</body>
-</html>
-
-#lightboxTitle { background:#E60000; padding:15px; font-size:28px; text-align:center; width:100%; flex-shrink:0; font-weight:bold; }
-#lightboxDetails { padding:15px; flex:1; font-size:16px; display:flex; flex-direction:column; gap:8px; overflow-y:auto; }
-.detail-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.2); }
-.detail-label { font-weight:bold; min-width:130px; }
-.detail-value { flex-grow:1; }
-
-/* Lightbox przyciski */
-#closeLightbox { position:absolute; top:10px; right:15px; font-size:32px; font-weight:bold; color:white; background:none; border:none; cursor:pointer; z-index:1001; }
-#prevBtn, #nextBtn { position:absolute; top:50%; transform:translateY(-50%); font-size:50px; color:white; background: rgba(0,0,0,0.4); border:none; padding:20px; cursor:pointer; border-radius:50%; z-index:1001; }
-#prevBtn { left:10px; } #nextBtn { right:10px; }
-
-/* Responsywność */
-@media (max-width:1000px){
-  #lightboxContent { flex-direction: column; width:95%; height:90%; }
-  #lightboxImg { max-width:100%; max-height:50%; }
-  #prevBtn, #nextBtn { font-size:30px; padding:10px; }
-  #lista { flex-direction:column; align-items:center; }
-}
-</style>
-</head>
-<body>
-
-<h1>🚒 Baza wozów strażackich w Polsce</h1>
-
-<input type="text" id="search" placeholder="Szukaj jednostki, ID, rejestracji, marki...">
-<select id="filterWoj">
-  <option value="">Wszystkie województwa</option>
-  <option value="Małopolskie">Małopolskie</option>
-  <option value="Mazowieckie">Mazowieckie</option>
-  <option value="Pomorskie">Pomorskie</option>
-  <option value="Wielkopolskie">Wielkopolskie</option>
-  <option value="Dolnośląskie">Dolnośląskie</option>
-  <option value="Śląskie">Śląskie</option>
-  <option value="Łódzkie">Łódzkie</option>
-  <option value="Lubelskie">Lubelskie</option>
-  <option value="Lubuskie">Lubuskie</option>
-  <option value="Opolskie">Opolskie</option>
-  <option value="Podkarpackie">Podkarpackie</option>
-  <option value="Podlaskie">Podlaskie</option>
-  <option value="Świętokrzyskie">Świętokrzyskie</option>
-  <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
-  <option value="Zachodniopomorskie">Zachodniopomorskie</option>
-</select>
-
-<select id="sortBy">
-  <option value="ID">Sortuj po ID</option>
-  <option value="Jednostka">Sortuj po Jednostce</option>
-  <option value="Marka">Sortuj po Marce</option>
-  <option value="Rejestracja">Sortuj po Rejestracji</option>
-  <option value="Rok produkcji">Sortuj po Roku</option>
-</select>
-
-<div id="lista"></div>
-<div id="pagination"></div>
-
-<!-- Lightbox -->
-<div id="lightbox">
-  <button id="prevBtn">&#8592;</button>
-  <div id="lightboxContent">
-      <span id="closeLightbox">&times;</span>
-      <img id="lightboxImg" src="">
-      <div id="lightboxInfo">
-          <h2 id="lightboxTitle">Marka</h2>
-          <div id="lightboxDetails"></div>
-      </div>
-  </div>
-  <button id="nextBtn">&#8594;</button>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-<script>
-const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
-let currentPage = 1;
-const itemsPerPage = 80;
-let filteredWozki = [];
-let lightboxIndex = 0;
-
-Papa.parse(csvUrl, { download:true, header:true, skipEmptyLines:true, complete:function(results){
-    window.wozy = results.data;
-    window.wozy.sort((a,b)=>Number(a.ID)-Number(b.ID));
-    displayWozow();
-}});
-
-function getStatusColor(status){
-    if(!status) return 'white';
-    const s=status.toLowerCase();
-    if(s==='czynny') return 'green';
-    if(['wycofany ze służby','sprzedany','rozbity','spłonął'].includes(s)) return 'red';
-    if(s==='przeniesiony') return 'yellow';
-    if(s==='obiekt muzeum') return 'blue';
-    if(s==='porzucony') return 'orange';
-    return 'white';
-}
-
-function displayWozow(){
-    const lista=document.getElementById('lista');
-    const pagination=document.getElementById('pagination');
-    const search=document.getElementById('search').value.toLowerCase();
-    const wojFilter=document.getElementById('filterWoj').value;
-    const sortBy=document.getElementById('sortBy').value;
-    lista.innerHTML='';
-    pagination.innerHTML='';
-
-    window.wozy.sort((a,b)=>{
-        let valA=a[sortBy]||''; let valB=b[sortBy]||'';
-        if(sortBy==='ID') return Number(valA)-Number(valB);
-        return valA.toString().localeCompare(valB.toString());
-    });
-
-    filteredWozki = window.wozy.filter(w=>{
-        return (
-            (w.Jednostka && w.Jednostka.toLowerCase().includes(search)) ||
-            (w.ID && w.ID.toString().includes(search)) ||
-            (w.Rejestracja && w.Rejestracja.toLowerCase().includes(search)) ||
-            (w.Marka && w.Marka.toLowerCase().includes(search))
-        ) && (wojFilter==='' || w.Województwo===wojFilter);
-    });
-
-    const totalPages=Math.ceil(filteredWozki.length/itemsPerPage);
-    if(currentPage>totalPages) currentPage=totalPages || 1;
-
-    const start=(currentPage-1)*itemsPerPage;
-    const end=start+itemsPerPage;
-    const pageItems=filteredWozki.slice(start,end);
-
-    pageItems.forEach((w,i)=>{
-        const div=document.createElement('div');
-        div.className='woz';
-        div.innerHTML=`
-            <img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}" alt="${w.Jednostka}">
-            <div class="woz-info">
-                <strong>ID:</strong> ${w.ID||'-'}
-                <strong>Jednostka:</strong> ${w.Jednostka||'-'}
-                <strong>Województwo:</strong> ${w.Województwo||'-'}
-                <strong>Powiat:</strong> ${w.Powiat||'-'}
-                <strong>Marka:</strong> ${w.Marka||'-'}
-                <strong>Rok:</strong> ${w['Rok produkcji']||'-'}
-                <strong>Status:</strong> <span class="status" style="color:${getStatusColor(w.Status)}">${w.Status||'-'}</span>
-                <strong>Rejestracja:</strong> ${w.Rejestracja||'-'}
-                <strong>Inne:</strong> ${w.Inne||'-'}
-            </div>
-        `;
-        lista.appendChild(div);
-        div.addEventListener('click',()=>openLightbox(start+i));
-    });
-
-    // Stronicowanie
-    if(totalPages>1){
-        const prev=document.createElement('button'); prev.textContent='Prev'; prev.className='page-btn'; prev.disabled=currentPage===1; if(currentPage===1) prev.classList.add('disabled');
-        prev.addEventListener('click',()=>{ currentPage--; displayWozow(); });
-        pagination.appendChild(prev);
-
-        for(let p=1;p<=totalPages;p++){
-            const btn=document.createElement('button');
-            btn.textContent=p; btn.className='page-btn'; if(p===currentPage) btn.classList.add('disabled');
-            btn.addEventListener('click',()=>{ currentPage=p; displayWozow(); });
-            pagination.appendChild(btn);
-        }
-
-        const next=document.createElement('button'); next.textContent='Next'; next.className='page-btn'; next.disabled=currentPage===totalPages; if(currentPage===totalPages) next.classList.add('disabled');
-        next.addEventListener('click',()=>{ currentPage++; displayWozow(); });
-        pagination.appendChild(next);
-    }
-}
-
-document.getElementById('search').addEventListener('input',()=>{ currentPage=1; displayWozow(); });
-document.getElementById('filterWoj').addEventListener('change',()=>{ currentPage=1; displayWozow(); });
-document.getElementById('sortBy').addEventListener('change',()=>{ displayWozow(); });
-
-// Lightbox
-const lightbox=document.getElementById('lightbox');
-const lbImg=document.getElementById('lightboxImg');
-const lbTitle=document.getElementById('lightboxTitle');
-const lbDetails=document.getElementById('lightboxDetails');
-const closeBtn=document.getElementById('closeLightbox');
-const prevBtn=document.getElementById('prevBtn');
-const nextBtn=document.getElementById('nextBtn');
-
-function openLightbox(idx){
-    lightboxIndex=idx;
-    if(lightboxIndex<0) lightboxIndex=filteredWozki.length-1;
-    if(lightboxIndex>=filteredWozki.length) lightboxIndex=0;
-    const w=filteredWozki[lightboxIndex];
-    lbImg.src=w.Zdjęcie||'https://via.placeholder.com/800x600?text=Brak+zdjęcia';
-    lbTitle.textContent=w.Marka||'-';
-    lbDetails.innerHTML='';
-    const fields=['ID','Jednostka','Województwo','Powiat','Rok produkcji','Status','Rejestracja','Inne'];
-    fields.forEach(f=>{
-        const row=document.createElement('div'); row.className='detail-row';
-        row.innerHTML=`<div class="detail-label">${f}:</div><div class="detail-value" style="color:${f==='Status'?getStatusColor(w[f]):'white'}">${w[f]||'-'}</div>`;
-        lbDetails.appendChild(row);
-    });
-    lightbox.style.display='flex';
-}
-
-closeBtn.addEventListener('click',()=>lightbox.style.display='none');
-prevBtn.addEventListener('click',()=>{ openLightbox(lightboxIndex-1); });
-nextBtn.addEventListener('click',()=>{ openLightbox(lightboxIndex+1); });
-
-// Obsługa klawiatury
-document.addEventListener('keydown',e=>{
-    if(lightbox.style.display==='flex'){
-        if(e.key==='ArrowLeft') openLightbox(lightboxIndex-1);
-        if(e.key==='ArrowRight') openLightbox(lightboxIndex+1);
-        if(e.key==='Escape') lightbox.style.display='none';
-    }
-});
-</script>
-</body>
-</html>
