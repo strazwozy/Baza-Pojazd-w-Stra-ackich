@@ -70,12 +70,24 @@ function displayWozow() {
     const lista = document.getElementById('lista');
     const search = document.getElementById('search').value.toLowerCase();
     const wojFilter = document.getElementById('filterWoj').value;
+    const sortBy = document.getElementById('sortBy').value;
     lista.innerHTML = '';
 
-    window.wozy.forEach(w => {
-        if ((w.Jednostka || '').toLowerCase().includes(search) &&
-            (wojFilter === '' || w.Województwo === wojFilter)) {
+    // sortowanie wozów wg select
+    window.wozy.sort((a, b) => {
+        let valA = a[sortBy] || '';
+        let valB = b[sortBy] || '';
+        if(sortBy === 'ID') return Number(valA) - Number(valB); // ID jako liczba
+        return valA.toString().localeCompare(valB.toString());
+    });
 
+    window.wozy.forEach(w => {
+        // wyszukiwanie po Jednostce, ID lub Rejestracji
+        if (
+            (w.Jednostka && w.Jednostka.toLowerCase().includes(search)) ||
+            (w.ID && w.ID.toString().includes(search)) ||
+            (w.Rejestracja && w.Rejestracja.toLowerCase().includes(search))
+        ) {
             const div = document.createElement('div');
             div.className = 'woz';
             div.innerHTML = `
@@ -86,7 +98,7 @@ function displayWozow() {
                     <strong>Województwo:</strong> ${w.Województwo || '-'}
                     <strong>Powiat:</strong> ${w.Powiat || '-'}
                     <strong>Marka:</strong> ${w.Marka || '-'}
-                   <strong>Rok:</strong> ${w['Rok produkcji'] || '-'}
+                    <strong>Rok:</strong> ${w['Rok produkcji'] || '-'}
                     <strong>Status:</strong> ${w.Status || '-'}
                     <strong>Rejestracja:</strong> ${w.Rejestracja || '-'}
                     <strong>Inne:</strong> ${w.Inne || '-'}
@@ -97,9 +109,11 @@ function displayWozow() {
     });
 }
 
+// event listener
 document.getElementById('search').addEventListener('input', displayWozow);
 document.getElementById('filterWoj').addEventListener('change', displayWozow);
-</script>
+document.getElementById('sortBy').addEventListener('change', displayWozow);
 
+    <script>
 </body>
 </html>
