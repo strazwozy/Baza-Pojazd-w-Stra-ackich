@@ -49,6 +49,9 @@ const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1
     complete: function(results) {
         window.wozy = results.data;
 
+ // to jest linia debugowa
+        console.log("Wczytane wozki:", results.data);
+
         // sortowanie po ID
         window.wozy.sort((a, b) => Number(a.ID) - Number(b.ID));
 
