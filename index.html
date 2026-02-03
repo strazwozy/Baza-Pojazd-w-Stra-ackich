@@ -121,7 +121,6 @@ let lightboxIndex = 0;
 
 Papa.parse(csvUrl, { download:true, header:true, skipEmptyLines:true, complete:function(results){
     window.wozy = results.data;
-    window.wozy.sort((a,b)=>Number(a.ID)-Number(b.ID));
     displayWozow();
 }});
 
@@ -145,23 +144,17 @@ function displayWozow(){
     lista.innerHTML='';
     pagination.innerHTML='';
 
+    // SORTOWANIE – poprawione, ID traktowane jak string
     window.wozy.sort((a,b)=>{
-if(sortBy==='ID'){ 
-    const valA = parseInt(a.ID) || 0;
-    const valB = parseInt(b.ID) || 0;
-    return valA - valB;
-} else {
-    const valA = (a[sortBy] || '').toString().toLowerCase();
+        const valA = (a[sortBy] || '').toString().toLowerCase();
         const valB = (b[sortBy] || '').toString().toLowerCase();
         return valA.localeCompare(valB);
-    }
-});
-        
+    });
 
     filteredWozki = window.wozy.filter(w=>{
         return (
             (w.Jednostka && w.Jednostka.toLowerCase().includes(search)) ||
-            (w.ID && w.ID.toString().includes(search)) ||
+            (w.ID && w.ID.toLowerCase().includes(search)) ||
             (w.Rejestracja && w.Rejestracja.toLowerCase().includes(search)) ||
             (w.Marka && w.Marka.toLowerCase().includes(search))
         ) && (wojFilter==='' || w.Województwo===wojFilter);
@@ -260,6 +253,3 @@ document.addEventListener('keydown',e=>{
 </body>
 </html>
 
-
-</body>
-</html>
