@@ -17,13 +17,16 @@ h1 { text-align: center; margin-bottom:20px; }
 
 /* Lightbox pełny ekran */
 #lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:1000; }
-#lightboxContent { background:#990000; display:flex; width:90%; height:90%; border-radius:15px; overflow:hidden; color:white; position:relative; box-shadow:0 0 20px rgba(0,0,0,0.6); }
+#lightboxContent { background:#FF1A1A; display:flex; width:90%; height:90%; border-radius:15px; overflow:hidden; color:white; position:relative; box-shadow:0 0 20px rgba(0,0,0,0.6); }
 #lightboxImg { max-width:60%; max-height:100%; object-fit:contain; background:#000; }
 #lightboxInfo { flex:1; display:flex; flex-direction:column; overflow-y:auto; }
-#lightboxTitle { background:#cc0000; padding:15px; margin:0; font-size:28px; text-align:center; }
-#lightboxDetails { padding:15px; flex:1; font-size:16px; }
+#lightboxTitle { background:#E60000; padding:15px; margin:0; font-size:28px; text-align:center; font-weight:bold; }
+#lightboxDetails { padding:15px; flex:1; font-size:16px; display:flex; flex-direction:column; gap:8px; }
 
-/* Lightbox przyciski */
+.detail-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.2);}
+.detail-label { font-weight:bold; min-width:130px; }
+.detail-value { flex-grow:1; }
+
 #closeLightbox { position:absolute; top:10px; right:15px; font-size:32px; font-weight:bold; color:white; background:none; border:none; cursor:pointer; z-index:1001; }
 #prevBtn, #nextBtn { position:absolute; top:50%; transform:translateY(-50%); font-size:50px; color:white; background: rgba(0,0,0,0.4); border:none; padding:20px; cursor:pointer; border-radius:50%; z-index:1001; }
 #prevBtn { left:10px; } #nextBtn { right:10px; }
@@ -116,7 +119,6 @@ function displayWozow(){
     const sortBy = document.getElementById('sortBy').value;
     lista.innerHTML='';
 
-    // sortowanie
     window.wozy.sort((a,b)=>{
         let valA=a[sortBy]||''; let valB=b[sortBy]||'';
         if(sortBy==='ID') return Number(valA)-Number(valB);
@@ -132,7 +134,6 @@ function displayWozow(){
         ) && (wojFilter==='' || w.Województwo===wojFilter);
     });
 
-    // tylko strona 1 (paginacja wyłączona na lightbox, strzałki)
     const start=(currentPage-1)*itemsPerPage;
     const end=start+itemsPerPage;
     const pageItems=filteredWozki.slice(start,end);
@@ -159,7 +160,6 @@ function displayWozow(){
     });
 }
 
-// eventy
 document.getElementById('search').addEventListener('input',()=>{currentPage=1; displayWozow();});
 document.getElementById('filterWoj').addEventListener('change',()=>{currentPage=1; displayWozow();});
 document.getElementById('sortBy').addEventListener('change',()=>{displayWozow();});
@@ -180,24 +180,29 @@ function openLightbox(idx){
     const w=filteredWozki[lightboxIndex];
     lbImg.src=w.Zdjęcie||'https://via.placeholder.com/400x300?text=Brak+zdjęcia';
     lbTitle.textContent=w.Marka||'-';
-    lbDetails.innerHTML=`
-        <div><strong>ID:</strong> ${w.ID||'-'}</div>
-        <div><strong>Jednostka:</strong> ${w.Jednostka||'-'}</div>
-        <div><strong>Województwo:</strong> ${w.Województwo||'-'}</div>
-        <div><strong>Powiat:</strong> ${w.Powiat||'-'}</div>
-        <div><strong>Rok:</strong> ${w['Rok produkcji']||'-'}</div>
-        <div><strong>Status:</strong> <span style="color:${getStatusColor(w.Status)}">${w.Status||'-'}</span></div>
-        <div><strong>Rejestracja:</strong> ${w.Rejestracja||'-'}</div>
-        <div><strong>Inne:</strong> ${w.Inne||'-'}</div>
-    `;
+    lbDetails.innerHTML='';
+    const fields=['ID','Jednostka','Województwo','Powiat','Rok produkcji','Status','Rejestracja','Inne'];
+    fields.forEach(f=>{
+        const row=document.createElement('div'); row.className='detail-row';
+        row.innerHTML=`<div class="detail-label">${f}:</div><div class="detail-value" style="color:${f==='Status'?getStatusColor(w[f]):'white'}">${w[f]||'-'}</div>`;
+        lbDetails.appendChild(row);
+    });
     lightbox.style.display='flex';
 }
 
 closeBtn.addEventListener('click',()=>lightbox.style.display='none');
 prevBtn.addEventListener('click',()=>{openLightbox(lightboxIndex-1);});
 nextBtn.addEventListener('click',()=>{openLightbox(lightboxIndex+1);});
-</script>
 
+// obsługa klawiatury
+document.addEventListener('keydown',e=>{
+    if(lightbox.style.display==='flex'){
+        if(e.key==='ArrowLeft') openLightbox(lightboxIndex-1);
+        if(e.key==='ArrowRight') openLightbox(lightboxIndex+1);
+        if(e.key==='Escape') lightbox.style.display='none';
+    }
+});
+</script>
 </body>
 </html>
 
