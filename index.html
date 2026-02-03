@@ -4,36 +4,35 @@
 <meta charset="UTF-8">
 <title>🚒 Baza wozów strażackich</title>
 <style>
-body { font-family: Arial; background:#f2f2f2; padding:20px; }
-h1 { text-align: center; }
+body { font-family: Arial; background:#f2f2f2; padding:20px; margin:0; }
+h1 { text-align: center; margin-bottom:20px; }
 #search, #filterWoj, #sortBy { margin:10px 5px; padding:5px; font-size:16px; border-radius:6px; border:1px solid #ccc; }
 #sortBy { background:#b30000; color:white; }
-#lista { display: flex; flex-wrap: wrap; gap:10px; justify-content:center; }
-.woz { background:white; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items: center; width: 200px; box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer; }
+#lista { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
+.woz { background:white; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items:center; width:200px; box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer; }
 .woz img { width:180px; height:120px; object-fit:cover; border-radius:6px; margin-bottom:10px; }
 .woz-info { display:flex; flex-direction: column; gap:3px; text-align:left; width:100%; }
 .woz-info strong { display:inline-block; width:90px; }
 .status { font-weight:bold; }
-#pagination { text-align:center; margin-top:20px; }
-.pageBtn { margin:0 5px; padding:5px 10px; border:none; border-radius:5px; background:#b30000; color:white; cursor:pointer; }
-.pageBtn.disabled { background:#ccc; cursor:not-allowed; }
 
-/* Lightbox */
-#lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index:1000; }
-#lightboxContent { background: linear-gradient(145deg, #990000, #b30000); display:flex; max-width:1000px; width:90%; border-radius:15px; overflow:hidden; color:white; box-shadow:0 0 20px rgba(0,0,0,0.6); position: relative; }
-#lightbox img { max-width:60%; object-fit:contain; }
-#lightboxInfo { padding:20px; flex:1; display:flex; flex-direction:column; justify-content:flex-start; overflow-y:auto; }
-#lightboxInfo h2 { margin-top:0; font-size:28px; }
-#lightboxInfo div { margin:5px 0; font-size:16px; }
+/* Lightbox pełny ekran */
+#lightbox { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); justify-content:center; align-items:center; z-index:1000; }
+#lightboxContent { background:#990000; display:flex; width:90%; height:90%; border-radius:15px; overflow:hidden; color:white; position:relative; box-shadow:0 0 20px rgba(0,0,0,0.6); }
+#lightboxImg { max-width:60%; max-height:100%; object-fit:contain; background:#000; }
+#lightboxInfo { flex:1; display:flex; flex-direction:column; overflow-y:auto; }
+#lightboxTitle { background:#cc0000; padding:15px; margin:0; font-size:28px; text-align:center; }
+#lightboxDetails { padding:15px; flex:1; font-size:16px; }
+
+/* Lightbox przyciski */
 #closeLightbox { position:absolute; top:10px; right:15px; font-size:32px; font-weight:bold; color:white; background:none; border:none; cursor:pointer; z-index:1001; }
-#prevBtn, #nextBtn { position:absolute; top:50%; transform:translateY(-50%); font-size:40px; color:white; background: rgba(0,0,0,0.4); border:none; padding:15px; cursor:pointer; border-radius:50%; z-index:1001; }
+#prevBtn, #nextBtn { position:absolute; top:50%; transform:translateY(-50%); font-size:50px; color:white; background: rgba(0,0,0,0.4); border:none; padding:20px; cursor:pointer; border-radius:50%; z-index:1001; }
 #prevBtn { left:10px; } #nextBtn { right:10px; }
 
 @media (max-width:800px){
-  #lightboxContent { flex-direction: column; max-width:95%; }
-  #lightbox img { max-width:100%; height:auto; }
+  #lightboxContent { flex-direction: column; width:95%; height:90%; }
+  #lightboxImg { max-width:100%; max-height:50%; }
   #prevBtn, #nextBtn { font-size:30px; padding:10px; }
-  #lista { flex-direction: column; align-items:center; }
+  #lista { flex-direction:column; align-items:center; }
 }
 </style>
 </head>
@@ -70,7 +69,6 @@ h1 { text-align: center; }
 </select>
 
 <div id="lista"></div>
-<div id="pagination"></div>
 
 <!-- Lightbox -->
 <div id="lightbox">
@@ -91,8 +89,8 @@ h1 { text-align: center; }
 const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
 let currentPage = 1;
 const itemsPerPage = 80;
-
 let lightboxIndex = 0;
+let filteredWozki = [];
 
 Papa.parse(csvUrl, { download:true, header:true, skipEmptyLines:true, complete:function(results){
     window.wozy = results.data;
@@ -120,13 +118,12 @@ function displayWozow(){
 
     // sortowanie
     window.wozy.sort((a,b)=>{
-        let valA = a[sortBy]||'';
-        let valB = b[sortBy]||'';
+        let valA=a[sortBy]||''; let valB=b[sortBy]||'';
         if(sortBy==='ID') return Number(valA)-Number(valB);
         return valA.toString().localeCompare(valB.toString());
     });
 
-    const filtered = window.wozy.filter(w=>{
+    filteredWozki = window.wozy.filter(w=>{
         return (
             (w.Jednostka && w.Jednostka.toLowerCase().includes(search)) ||
             (w.ID && w.ID.toString().includes(search)) ||
@@ -135,14 +132,13 @@ function displayWozow(){
         ) && (wojFilter==='' || w.Województwo===wojFilter);
     });
 
-    const totalPages = Math.ceil(filtered.length/itemsPerPage);
-    if(currentPage>totalPages) currentPage = totalPages || 1;
-    const start = (currentPage-1)*itemsPerPage;
-    const end = start+itemsPerPage;
-    const pageItems = filtered.slice(start,end);
+    // tylko strona 1 (paginacja wyłączona na lightbox, strzałki)
+    const start=(currentPage-1)*itemsPerPage;
+    const end=start+itemsPerPage;
+    const pageItems=filteredWozki.slice(start,end);
 
     pageItems.forEach((w,i)=>{
-        const div = document.createElement('div');
+        const div=document.createElement('div');
         div.className='woz';
         div.innerHTML=`
             <img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}" alt="${w.Jednostka}">
@@ -159,22 +155,8 @@ function displayWozow(){
             </div>
         `;
         lista.appendChild(div);
-
-        div.addEventListener('click', ()=>{
-            openLightbox(start+i);
-        });
+        div.addEventListener('click',()=>openLightbox(start+i));
     });
-
-    // paginacja
-    const pagination = document.getElementById('pagination');
-    pagination.innerHTML='';
-    for(let i=1;i<=totalPages;i++){
-        const btn = document.createElement('button');
-        btn.textContent=i;
-        btn.className='pageBtn'+(i===currentPage?' disabled':'');
-        if(i!==currentPage) btn.addEventListener('click',()=>{currentPage=i; displayWozow();});
-        pagination.appendChild(btn);
-    }
 }
 
 // eventy
@@ -187,12 +169,17 @@ const lightbox = document.getElementById('lightbox');
 const lbImg = document.getElementById('lightboxImg');
 const lbTitle = document.getElementById('lightboxTitle');
 const lbDetails = document.getElementById('lightboxDetails');
+const closeBtn = document.getElementById('closeLightbox');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
 
-function openLightbox(index){
-    lightboxIndex = index;
-    const w = filteredWoz(index);
-    lbImg.src = w.Zdjęcie||'https://via.placeholder.com/400x300?text=Brak+zdjęcia';
-    lbTitle.textContent = w.Marka || '-';
+function openLightbox(idx){
+    lightboxIndex=idx;
+    if(lightboxIndex<0) lightboxIndex=filteredWozki.length-1;
+    if(lightboxIndex>=filteredWozki.length) lightboxIndex=0;
+    const w=filteredWozki[lightboxIndex];
+    lbImg.src=w.Zdjęcie||'https://via.placeholder.com/400x300?text=Brak+zdjęcia';
+    lbTitle.textContent=w.Marka||'-';
     lbDetails.innerHTML=`
         <div><strong>ID:</strong> ${w.ID||'-'}</div>
         <div><strong>Jednostka:</strong> ${w.Jednostka||'-'}</div>
@@ -206,35 +193,9 @@ function openLightbox(index){
     lightbox.style.display='flex';
 }
 
-function filteredWoz(idx){
-    const search = document.getElementById('search').value.toLowerCase();
-    const wojFilter = document.getElementById('filterWoj').value;
-    const sortBy = document.getElementById('sortBy').value;
-    const filtered = window.wozy.filter(w=>{
-        return (
-            (w.Jednostka && w.Jednostka.toLowerCase().includes(search)) ||
-            (w.ID && w.ID.toString().includes(search)) ||
-            (w.Rejestracja && w.Rejestracja.toLowerCase().includes(search)) ||
-            (w.Marka && w.Marka.toLowerCase().includes(search))
-        ) && (wojFilter==='' || w.Województwo===wojFilter);
-    });
-    filtered.sort((a,b)=>{
-        let valA=a[sortBy]||''; let valB=b[sortBy]||'';
-        if(sortBy==='ID') return Number(valA)-Number(valB);
-        return valA.toString().localeCompare(valB.toString());
-    });
-    return filtered[idx];
-}
-
-document.getElementById('closeLightbox').addEventListener('click', ()=>lightbox.style.display='none');
-document.getElementById('prevBtn').addEventListener('click', ()=>{
-    lightboxIndex = (lightboxIndex-1+itemsPerPage) % window.wozy.length;
-    openLightbox(lightboxIndex);
-});
-document.getElementById('nextBtn').addEventListener('click', ()=>{
-    lightboxIndex = (lightboxIndex+1) % window.wozy.length;
-    openLightbox(lightboxIndex);
-});
+closeBtn.addEventListener('click',()=>lightbox.style.display='none');
+prevBtn.addEventListener('click',()=>{openLightbox(lightboxIndex-1);});
+nextBtn.addEventListener('click',()=>{openLightbox(lightboxIndex+1);});
 </script>
 
 </body>
