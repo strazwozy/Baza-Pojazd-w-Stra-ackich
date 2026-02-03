@@ -75,6 +75,109 @@ function displayWozow() {
                     <strong>ID:</strong> ${w.ID}
                     <strong>Jednostka:</strong> ${w.Jednostka}
                     <strong>Województwo:</strong> ${w.Województwo}
+                    <!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Baza wozów strażackich</title>
+<style>
+body { font-family: Arial; background:#f2f2f2; padding:20px; }
+.woz { background:white; margin:10px; padding:10px; border-radius:8px; display:flex; gap:10px; align-items:flex-start; }
+img { width:150px; border-radius:6px; }
+input, select { margin:5px; padding:5px; }
+.woz-info { display:flex; flex-direction: column; gap:3px; }
+</style>
+</head>
+<body>
+
+<h1>🚒 Baza wozów strażackich w Polsce</h1>
+
+<input type="text" id="search" placeholder="Szukaj jednostki...">
+
+<select id="filterWoj">
+  <option value="">Wszystkie województwa</option>
+  <option value="Małopolskie">Małopolskie</option>
+  <option value="Mazowieckie">Mazowieckie</option>
+  <option value="Pomorskie">Pomorskie</option>
+  <option value="Wielkopolskie">Wielkopolskie</option>
+  <option value="Dolnośląskie">Dolnośląskie</option>
+  <option value="Śląskie">Śląskie</option>
+  <option value="Łódzkie">Łódzkie</option>
+  <option value="Lubelskie">Lubelskie</option>
+  <option value="Lubuskie">Lubuskie</option>
+  <option value="Opolskie">Opolskie</option>
+  <option value="Podkarpackie">Podkarpackie</option>
+  <option value="Podlaskie">Podlaskie</option>
+  <option value="Świętokrzyskie">Świętokrzyskie</option>
+  <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
+  <option value="Zachodniopomorskie">Zachodniopomorskie</option>
+</select>
+
+<div id="lista"></div>
+
+<!-- Skrypt do wczytania CSV i generowania wozów -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <script>
+const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
+
+    Papa.parse(csvUrl, {
+    download: true,
+    header: true,
+    complete: function(results) {
+        window.wozy = results.data;
+
+        // sortowanie po ID
+        window.wozy.sort((a, b) => Number(a.ID) - Number(b.ID));
+
+        displayWozow();
+    }
+});
+      
+
+function displayWozow() {
+    const lista = document.getElementById('lista');
+    const search = document.getElementById('search').value.toLowerCase();
+    const wojFilter = document.getElementById('filterWoj').value;
+    lista.innerHTML = '';
+
+    window.wozy.forEach(w => {
+        if (w.Jednostka.toLowerCase().includes(search) &&
+            (wojFilter === '' || w.Województwo === wojFilter)) {
+
+            const div = document.createElement('div');
+            div.className = 'woz';
+            div.innerHTML = `
+                <img src="${w.Zdjęcie}" alt="${w.Jednostka}">
+                <div class="woz-info">
+                    <strong>ID:</strong> ${w.ID}
+                    <strong>Jednostka:</strong> ${w.Jednostka}
+                    <strong>Województwo:</strong> ${w.Województwo}
+                    <strong>Powiat:</strong> ${w.Powiat || '-'}
+                    <strong>Marka:</strong> ${w.Marka}
+                    <strong>Rok:</strong> ${w.Rok}
+                    <strong>Status:</strong> ${w.Status}
+                    <strong>Rejestracja:</strong> ${w.Rejestracja || '-'}
+                    <strong>Inne:</strong> ${w.Inne || '-'}
+                </div>
+            `;
+            lista.appendChild(div);
+        }
+    });
+}
+
+document.getElementById('search').addEventListener('input', displayWozow);
+document.getElementById('filterWoj').addEventListener('change', displayWozow);
+
+ 
+}
+
+
+}
+  
+</script>
+
+</body>
+</html>
                     <strong>Marka:</strong> ${w.Marka}
                     <strong>Rok:</strong> ${w.Rok}
                     <strong>Status:</strong> ${w.Status}
