@@ -53,17 +53,20 @@ h1 { text-align: center; }
     background: #222;
     border-radius: 10px;
     padding: 20px;
-    max-width: 90%;
-    max-height: 90%;
+    width: 80%;
+    max-width: 1000px;
+    height: 70%;
+    max-height: 700px;
     gap: 20px;
+    overflow: hidden;
 }
-#lightbox img { max-width: 50%; max-height: 80vh; border-radius:8px; }
-#lightbox .details { color:white; max-width:50%; overflow-y:auto; }
+#lightbox img { width: 50%; height: 100%; object-fit: cover; border-radius:8px; }
+#lightbox .details { color:white; width: 50%; overflow-y:auto; }
 #lightbox .details p { margin: 4px 0; }
 #lightbox .close { position:absolute; top:20px; right:30px; font-size:30px; color:white; cursor:pointer; }
-#lightbox .nav { position:absolute; top:50%; transform:translateY(-50%); font-size:40px; color:white; cursor:pointer; padding:10px; user-select:none; }
-#lightbox .prev { left:20px; }
-#lightbox .next { right:20px; }
+#lightbox .nav { position:absolute; top:50%; transform:translateY(-50%); font-size:50px; color:white; cursor:pointer; padding:10px; user-select:none; }
+#lightbox .prev { left:10px; }
+#lightbox .next { right:10px; }
 
 /* Responsywność na telefony */
 @media (max-width: 600px) {
@@ -71,8 +74,8 @@ h1 { text-align: center; }
     .woz { width: 90%; }
     .woz img { width: 100%; height: auto; }
     .woz-info strong { width: 100px; }
-    #lightbox-content { flex-direction: column; max-height: 80%; }
-    #lightbox img, #lightbox .details { max-width: 100%; }
+    #lightbox-content { flex-direction: column; width: 90%; height: auto; max-height: 90%; }
+    #lightbox img, #lightbox .details { width: 100%; height: auto; }
 }
 </style>
 </head>
@@ -165,9 +168,22 @@ function displayWozow() {
     const start=(currentPage-1)*perPage, end=start+perPage;
     const pageData=filtered.slice(start,end);
 
+    const statusColors = {
+        'czynny': 'green',
+        'wycofany ze służby': 'red',
+        'przeniesiony': 'yellow',
+        'obiekt muzeum': 'blue',
+        'sprzedany': 'red',
+        'rozbity': 'red',
+        'spłonął': 'red',
+        'porzucony': 'orange'
+    };
+
     pageData.forEach((w,i)=>{
         const div=document.createElement('div');
         div.className='woz';
+        const statusText=w.Status||'-';
+        const statusColor=statusColors[statusText.toLowerCase()]||'black';
         div.innerHTML=`
             <img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}" alt="${w.Jednostka}">
             <div class="woz-info">
@@ -177,7 +193,7 @@ function displayWozow() {
                 <strong>Powiat:</strong> ${w.Powiat||'-'}
                 <strong>Marka:</strong> ${w.Marka||'-'}
                 <strong>Rok:</strong> ${w['Rok produkcji']||'-'}
-                <strong>Status:</strong> ${w.Status||'-'}
+                <strong>Status:</strong> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span>
                 <strong>Rejestracja:</strong> ${w.Rejestracja||'-'}
                 <strong>Inne:</strong> ${w.Inne||'-'}
             </div>
@@ -195,6 +211,18 @@ function displayWozow() {
 
 function showLightbox() {
     const w = window.wozy[currentLightboxIndex];
+    const statusColors = {
+        'czynny': 'green',
+        'wycofany ze służby': 'red',
+        'przeniesiony': 'yellow',
+        'obiekt muzeum': 'blue',
+        'sprzedany': 'red',
+        'rozbity': 'red',
+        'spłonął': 'red',
+        'porzucony': 'orange'
+    };
+    const statusText = w.Status || '-';
+    const statusColor = statusColors[statusText.toLowerCase()] || 'black';
     document.querySelector('#lightbox img').src = w.Zdjęcie || 'https://via.placeholder.com/600x400?text=Brak+zdjęcia';
     document.querySelector('#lightbox .details').innerHTML = `
         <p><strong>ID:</strong> ${w.ID||'-'}</p>
@@ -203,24 +231,22 @@ function showLightbox() {
         <p><strong>Powiat:</strong> ${w.Powiat||'-'}</p>
         <p><strong>Marka:</strong> ${w.Marka||'-'}</p>
         <p><strong>Rok:</strong> ${w['Rok produkcji']||'-'}</p>
-        <p><strong>Status:</strong> ${w.Status||'-'}</p>
+        <p><strong>Status:</strong> <span style="color:${statusColor}; font-weight:bold;">${statusText}</span></p>
         <p><strong>Rejestracja:</strong> ${w.Rejestracja||'-'}</p>
         <p><strong>Inne:</strong> ${w.Inne||'-'}</p>
     `;
     document.getElementById('lightbox').style.display='flex';
 }
 
+// Eventy
 document.getElementById('search').addEventListener('input', ()=>{currentPage=1; displayWozow();});
 document.getElementById('filterWoj').addEventListener('change', ()=>{currentPage=1; displayWozow();});
-
 document.getElementById('sortID').addEventListener('click', ()=>{sortField==='ID'?sortAsc=!sortAsc:(sortField='ID',sortAsc=true); currentPage=1; displayWozow();});
 document.getElementById('sortJednostka').addEventListener('click', ()=>{sortField==='Jednostka'?sortAsc=!sortAsc:(sortField='Jednostka',sortAsc=true); currentPage=1; displayWozow();});
 document.getElementById('sortMarka').addEventListener('click', ()=>{sortField==='Marka'?sortAsc=!sortAsc:(sortField='Marka',sortAsc=true); currentPage=1; displayWozow();});
 document.getElementById('sortRejestracja').addEventListener('click', ()=>{sortField==='Rejestracja'?sortAsc=!sortAsc:(sortField='Rejestracja',sortAsc=true); currentPage=1; displayWozow();});
-
 document.getElementById('prevPage').addEventListener('click', ()=>{if(currentPage>1){currentPage--; displayWozow();}});
 document.getElementById('nextPage').addEventListener('click', ()=>{currentPage++; displayWozow();});
-
 document.querySelector('#lightbox .close').addEventListener('click', ()=>{document.getElementById('lightbox').style.display='none';});
 document.getElementById('lightbox').addEventListener('click', e=>{if(e.target===document.getElementById('lightbox')) document.getElementById('lightbox').style.display='none';});
 document.querySelector('#lightbox .prev').addEventListener('click', ()=>{currentLightboxIndex=(currentLightboxIndex-1+window.wozy.length)%window.wozy.length; showLightbox();});
