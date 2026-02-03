@@ -2,13 +2,13 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>🚒 Baza wozów strażackich</title>
+<title>Baza wozów strażackich</title>
 <style>
 body { font-family: Arial; background:#f2f2f2; padding:20px; }
-  h1 { text-align: center; }
+h1 { text-align: center; }
 #search, #filterWoj { margin:10px 5px; padding:5px; font-size: 16px; }
 #lista { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-.woz { background:white; margin:10px; padding:10px; border-radius:8px; display:flex; gap:10px; align-items:flex-start; }
+.woz { background:white; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items: center; width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
 .woz img { width: 180px; height: auto; border-radius:6px; margin-bottom:10px; }
 .woz-info { display:flex; flex-direction: column; gap:3px; text-align: left; width: 100%; }
 .woz-info strong { display:inline-block; width: 80px; }
@@ -41,9 +41,8 @@ body { font-family: Arial; background:#f2f2f2; padding:20px; }
 
 <div id="lista"></div>
 
-<!-- Skrypt do wczytania CSV i generowania wozów -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-  <script>
+<script>
 const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
 
 Papa.parse(csvUrl, {
@@ -54,12 +53,12 @@ Papa.parse(csvUrl, {
         console.log("Wczytane wozki:", results.data);
         window.wozy = results.data;
 
-      // sortowanie po ID
+        // sortowanie po ID rosnąco
         window.wozy.sort((a,b) => Number(a.ID) - Number(b.ID));
+
         displayWozow();
     }
 });
-      
 
 function displayWozow() {
     const lista = document.getElementById('lista');
@@ -68,7 +67,7 @@ function displayWozow() {
     lista.innerHTML = '';
 
     window.wozy.forEach(w => {
-        if (w.Jednostka.toLowerCase().includes(search) &&
+        if ((w.Jednostka || '').toLowerCase().includes(search) &&
             (wojFilter === '' || w.Województwo === wojFilter)) {
 
             const div = document.createElement('div');
@@ -95,7 +94,6 @@ function displayWozow() {
 document.getElementById('search').addEventListener('input', displayWozow);
 document.getElementById('filterWoj').addEventListener('change', displayWozow);
 </script>
-
 
 </body>
 </html>
