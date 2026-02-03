@@ -4,12 +4,11 @@
 <meta charset="UTF-8">
 <title>🚒 Baza wozów strażackich</title>
 <style>
-/* Reset i box-sizing */
 * { box-sizing: border-box; margin:0; padding:0; }
-html, body { width:100%; overflow-x:hidden; font-family: Arial; background:#1a1a1a; color:white; padding:20px; }
+html, body { width:100%; font-family: Arial; background:#1a1a1a; color:white; padding:20px; }
 
-/* Nagłówek */
-h1 { text-align:center; margin-bottom:20px; background:#E60000; padding:15px; border-radius:8px; }
+/* Nagłówek strony */
+h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 
 /* Formularze filtrów */
 #search, #filterWoj, #sortBy {
@@ -27,7 +26,7 @@ h1 { text-align:center; margin-bottom:20px; background:#E60000; padding:15px; bo
 .status { font-weight:bold; }
 
 /* Stronicowanie */
-#pagination { display:flex; justify-content:center; gap:10px; margin-bottom:20px; }
+#pagination { display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
 .page-btn { padding:8px 12px; border-radius:6px; border:none; cursor:pointer; background:#b30000; color:white; }
 .page-btn.disabled { background:#555; cursor:default; }
 
@@ -39,9 +38,9 @@ h1 { text-align:center; margin-bottom:20px; background:#E60000; padding:15px; bo
 #lightboxContent {
     background:#1a1a1a;
     background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 8px);
-    display:flex; flex-direction:row; width:90%; max-width:1200px; height:90%; border-radius:15px; overflow:hidden; color:white; position:relative; box-shadow:0 0 20px rgba(0,0,0,0.6);
+    display:flex; flex-direction:row; width:95%; max-width:1600px; height:95%; border-radius:15px; overflow:hidden; color:white; position:relative; box-shadow:0 0 20px rgba(0,0,0,0.6);
 }
-#lightboxImg { max-width:60%; max-height:100%; object-fit:contain; background:#000; }
+#lightboxImg { max-width:80%; max-height:100%; object-fit:contain; background:#000; }
 #lightboxInfo { flex:1; display:flex; flex-direction:column; overflow-y:auto; background:#1a1a1a; }
 #lightboxTitle { background:#E60000; padding:15px; font-size:28px; text-align:center; width:100%; flex-shrink:0; font-weight:bold; }
 #lightboxDetails { padding:15px; flex:1; font-size:16px; display:flex; flex-direction:column; gap:8px; overflow-y:auto; }
@@ -55,7 +54,7 @@ h1 { text-align:center; margin-bottom:20px; background:#E60000; padding:15px; bo
 #prevBtn { left:10px; } #nextBtn { right:10px; }
 
 /* Responsywność */
-@media (max-width:800px){
+@media (max-width:1000px){
   #lightboxContent { flex-direction: column; width:95%; height:90%; }
   #lightboxImg { max-width:100%; max-height:50%; }
   #prevBtn, #nextBtn { font-size:30px; padding:10px; }
@@ -226,7 +225,7 @@ function openLightbox(idx){
     if(lightboxIndex<0) lightboxIndex=filteredWozki.length-1;
     if(lightboxIndex>=filteredWozki.length) lightboxIndex=0;
     const w=filteredWozki[lightboxIndex];
-    lbImg.src=w.Zdjęcie||'https://via.placeholder.com/400x300?text=Brak+zdjęcia';
+    lbImg.src=w.Zdjęcie||'https://via.placeholder.com/800x600?text=Brak+zdjęcia';
     lbTitle.textContent=w.Marka||'-';
     lbDetails.innerHTML='';
     const fields=['ID','Jednostka','Województwo','Powiat','Rok produkcji','Status','Rejestracja','Inne'];
