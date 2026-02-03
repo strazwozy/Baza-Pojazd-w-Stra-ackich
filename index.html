@@ -2,11 +2,11 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title> 🚒 Baza wozów strażackich</title>
+<title>🚒 Baza wozów strażackich</title>
 <style>
 body { font-family: Arial; background:#f2f2f2; padding:20px; }
 h1 { text-align: center; }
-#search, #filterWoj, #sortBy { margin:10px 5px; padding:5px; font-size: 16px; }
+#search, #filterWoj, button { margin:10px 5px; padding:5px; font-size: 16px; }
 #lista { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 .woz { background:white; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items: center; width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
 .woz img { 
@@ -18,6 +18,7 @@ h1 { text-align: center; }
 }
 .woz-info { display:flex; flex-direction: column; gap:3px; text-align: left; width: 100%; }
 .woz-info strong { display:inline-block; width: 80px; }
+.sort-buttons { text-align: center; margin:10px 0; }
 </style>
 </head>
 <body>
@@ -45,17 +46,20 @@ h1 { text-align: center; }
   <option value="Zachodniopomorskie">Zachodniopomorskie</option>
 </select>
 
-<select id="sortBy">
-  <option value="ID">Sortuj po ID</option>
-  <option value="Jednostka">Sortuj po jednostce</option>
-  <option value="Marka">Sortuj po marce</option>
-</select>
+<div class="sort-buttons">
+  <button id="sortID">ID ↑</button>
+  <button id="sortJednostka">Jednostka ↑</button>
+  <button id="sortMarka">Marka ↑</button>
+</div>
 
 <div id="lista"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
 const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
+
+let sortField = 'ID';
+let sortAsc = true;
 
 Papa.parse(csvUrl, {
     download: true,
@@ -64,10 +68,6 @@ Papa.parse(csvUrl, {
     complete: function(results) {
         console.log("Wczytane wozki:", results.data);
         window.wozy = results.data;
-
-        // bazowe sortowanie po ID rosnąco
-        window.wozy.sort((a,b) => Number(a.ID) - Number(b.ID));
-
         displayWozow();
     }
 });
@@ -76,19 +76,22 @@ function displayWozow() {
     const lista = document.getElementById('lista');
     const search = document.getElementById('search').value.toLowerCase();
     const wojFilter = document.getElementById('filterWoj').value;
-    const sortBy = document.getElementById('sortBy').value;
     lista.innerHTML = '';
 
-    // sortowanie wozów wg select
+    // sortowanie
     window.wozy.sort((a, b) => {
-        let valA = a[sortBy] || '';
-        let valB = b[sortBy] || '';
-        if(sortBy === 'ID') return Number(valA) - Number(valB);
-        return valA.toString().localeCompare(valB.toString());
+        let valA = a[sortField] || '';
+        let valB = b[sortField] || '';
+        if(sortField === 'ID') {
+            return sortAsc ? Number(valA)-Number(valB) : Number(valB)-Number(valA);
+        }
+        return sortAsc ? valA.toString().localeCompare(valB.toString()) : valB.toString().localeCompare(valA.toString());
     });
 
+    let count = 0;
     window.wozy.forEach(w => {
-        // wyszukiwanie po Jednostce, ID lub Rejestracji
+        if(count >= 80) return; // limit 80 wozów
+
         if (
             (w.Jednostka && w.Jednostka.toLowerCase().includes(search)) ||
             (w.ID && w.ID.toString().includes(search)) ||
@@ -111,13 +114,31 @@ function displayWozow() {
                 </div>
             `;
             lista.appendChild(div);
+            count++;
         }
     });
 }
 
+// eventy
 document.getElementById('search').addEventListener('input', displayWozow);
 document.getElementById('filterWoj').addEventListener('change', displayWozow);
-document.getElementById('sortBy').addEventListener('change', displayWozow);
+
+// sortowanie kliknięciem
+document.getElementById('sortID').addEventListener('click', () => {
+    if(sortField==='ID') sortAsc=!sortAsc; else {sortField='ID'; sortAsc=true;}
+    document.getElementById('sortID').textContent = `ID ${sortAsc?'↑':'↓'}`;
+    displayWozow();
+});
+document.getElementById('sortJednostka').addEventListener('click', () => {
+    if(sortField==='Jednostka') sortAsc=!sortAsc; else {sortField='Jednostka'; sortAsc=true;}
+    document.getElementById('sortJednostka').textContent = `Jednostka ${sortAsc?'↑':'↓'}`;
+    displayWozow();
+});
+document.getElementById('sortMarka').addEventListener('click', () => {
+    if(sortField==='Marka') sortAsc=!sortAsc; else {sortField='Marka'; sortAsc=true;}
+    document.getElementById('sortMarka').textContent = `Marka ${sortAsc?'↑':'↓'}`;
+    displayWozow();
+});
 </script>
 
 </body>
