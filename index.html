@@ -2,11 +2,11 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Baza wozów strażackich</title>
+<title> 🚒 Baza wozów strażackich</title>
 <style>
 body { font-family: Arial; background:#f2f2f2; padding:20px; }
 h1 { text-align: center; }
-#search, #filterWoj { margin:10px 5px; padding:5px; font-size: 16px; }
+#search, #filterWoj, #sortBy { margin:10px 5px; padding:5px; font-size: 16px; }
 #lista { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 .woz { background:white; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items: center; width: 200px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
 .woz img { 
@@ -24,7 +24,7 @@ h1 { text-align: center; }
 
 <h1>🚒 Baza wozów strażackich w Polsce</h1>
 
-<input type="text" id="search" placeholder="Szukaj jednostki...">
+<input type="text" id="search" placeholder="Szukaj jednostki, ID lub rejestracji...">
 
 <select id="filterWoj">
   <option value="">Wszystkie województwa</option>
@@ -45,6 +45,12 @@ h1 { text-align: center; }
   <option value="Zachodniopomorskie">Zachodniopomorskie</option>
 </select>
 
+<select id="sortBy">
+  <option value="ID">Sortuj po ID</option>
+  <option value="Jednostka">Sortuj po jednostce</option>
+  <option value="Marka">Sortuj po marce</option>
+</select>
+
 <div id="lista"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -59,7 +65,7 @@ Papa.parse(csvUrl, {
         console.log("Wczytane wozki:", results.data);
         window.wozy = results.data;
 
-        // sortowanie po ID rosnąco
+        // bazowe sortowanie po ID rosnąco
         window.wozy.sort((a,b) => Number(a.ID) - Number(b.ID));
 
         displayWozow();
@@ -77,7 +83,7 @@ function displayWozow() {
     window.wozy.sort((a, b) => {
         let valA = a[sortBy] || '';
         let valB = b[sortBy] || '';
-        if(sortBy === 'ID') return Number(valA) - Number(valB); // ID jako liczba
+        if(sortBy === 'ID') return Number(valA) - Number(valB);
         return valA.toString().localeCompare(valB.toString());
     });
 
@@ -109,11 +115,10 @@ function displayWozow() {
     });
 }
 
-// event listener
 document.getElementById('search').addEventListener('input', displayWozow);
 document.getElementById('filterWoj').addEventListener('change', displayWozow);
 document.getElementById('sortBy').addEventListener('change', displayWozow);
+</script>
 
-    <script>
 </body>
 </html>
