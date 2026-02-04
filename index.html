@@ -176,11 +176,15 @@ function displayWozow(){
     lista.innerHTML=''; pagination.innerHTML='';
 
     // Sortowanie
-    window.wozy.sort((a,b)=>{
-        const valA=(a[sortBy]||'').toString().toLowerCase();
-        const valB=(b[sortBy]||'').toString().toLowerCase();
-        return valA.localeCompare(valB, undefined, {numeric:true});
-    });
+    const sortDir = document.getElementById('sortDir').value;
+window.wozy.sort((a,b)=>{
+    const valA = (a[sortBy] || '').toString().toLowerCase();
+    const valB = (b[sortBy] || '').toString().toLowerCase();
+    if(sortDir === 'asc') return valA.localeCompare(valB, undefined, {numeric:true});
+    else return valB.localeCompare(valA, undefined, {numeric:true});
+});
+
+
 
     filteredWozki = window.wozy.filter(w=>{
         let searchMatch = true;
