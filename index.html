@@ -242,96 +242,79 @@ const closeBtn=document.getElementById('closeLightbox');
 const prevBtn=document.getElementById('prevBtn');
 const nextBtn=document.getElementById('nextBtn');
 
-function openLightbox(idx){
-    lightboxIndex=idx;
-    if(lightboxIndex<0) lightboxIndex=filteredWozki.length-1;
-    if(lightboxIndex>=filteredWozki.length) lightboxIndex=0;
-    const w=filteredWozki[lightboxIndex];
-    lbImg.src=w.Zdjęcie||'https://via.placeholder.com/800x600?text=Brak+zdjęcia';
-    lbTitle.textContent=`${w.Marka||'-'} (ID: ${w.ID||'-'})`;
-    lbDetails.innerHTML='';
+    function openLightbox(idx){
+    lightboxIndex = idx;
+    if(lightboxIndex < 0) lightboxIndex = filteredWozki.length - 1;
+    if(lightboxIndex >= filteredWozki.length) lightboxIndex = 0;
+    const w = filteredWozki[lightboxIndex];
 
-    const sections=[
-        {title:'🚨 Podstawowe dane', fields:['ID','Marka','Rok produkcji','Rejestracja','Typ']},
+    lbImg.src = w.Zdjęcie || 'https://via.placeholder.com/800x600?text=Brak+zdjęcia';
+    lbTitle.textContent = `${w.Marka||'-'} (ID: ${w.ID||'-'})`;
+    lbDetails.innerHTML = '';
+
+    const sections = [
+        {title:'🚨 Podstawowe dane', fields:['ID','Marka','Rok produkcji','Rejestracja','Typ','Status']},
         {title:'📍 Lokalizacja', fields:['Jednostka','Województwo','Powiat']},
         {title:'⚡ Status', fields:['Status']},
         {title:'📝 Inne', fields:['Inne']}
     ];
 
     sections.forEach(sec=>{
-        const secDiv=document.createElement('div');
+        const secDiv = document.createElement('div');
 
-        // Nagłówek tylko dla wszystkich poza "Inne"
-        if(sec.title !== '📝 Inne'){
-            const secHeader=document.createElement('h3');
-            secHeader.innerHTML=sec.title;
-            secDiv.appendChild(secHeader);
-        }
+        // Pokazujemy nagłówek sekcji zawsze
+        const secHeader = document.createElement('h3');
+        secHeader.innerHTML = sec.title;
+        secDiv.appendChild(secHeader);
 
         sec.fields.forEach(f=>{
-            const valueText = w[f] || '-';
-            const row=document.createElement('div'); row.className='detail-row';
-            const label=document.createElement('div'); label.className='detail-label'; label.textContent=f+':';
-            const value=document.createElement('div'); value.className='detail-value';
+            if(w[f]){
+                const row = document.createElement('div'); row.className='detail-row';
+                const label = document.createElement('div'); label.className='detail-label'; label.textContent=f+':';
+                const value = document.createElement('div'); value.className='detail-value';
 
-            if(f==='Status'){ value.style.color=getStatusColor(valueText); }
-            else value.textContent=valueText;
+                if(f==='Status'){
+                    value.style.color = getStatusColor(w[f]);
+                    value.textContent = w[f];
+                } else if(f !== 'Inne'){
+                    value.textContent = w[f];
+                }
 
-            // Klikalne pola
-            const clickableFields=['ID','Rejestracja','Województwo','Powiat','Rok produkcji','Jednostka'];
-            if(clickableFields.includes(f)){
-                value.style.textDecoration='underline';
-                value.style.cursor='pointer';
-                value.addEventListener('click',()=>{
-                    document.getElementById('search').value=valueText;
-                    filterField = f;
-                    currentPage=1; displayWozow();
-                    lightbox.style.display='none';
-                    history.pushState({search:valueText, field:f}, "", "");
-                });
+                // Klikalne wartości dla podstawowych filtrów
+                const clickableFields = ['ID','Rejestracja','Województwo','Powiat','Rok produkcji','Jednostka'];
+                if(clickableFields.includes(f)){
+                    value.style.textDecoration='underline';
+                    value.style.cursor='pointer';
+                    value.addEventListener('click',()=>{
+                        document.getElementById('search').value = w[f];
+                        filterField = f;
+                        currentPage=1; displayWozow();
+                        lightbox.style.display='none';
+                        history.pushState({search:w[f], field:f}, "", "");
+                    });
+                }
+
+                // Sekcja Inne – tylko nazwy OSP są klikane, reszta tekstu nie
+                if(f==='Inne'){
+                    const text = w[f];
+                    const newText = text.replace(/(OSP [\w\sąęłóńżźć]+)/gi, match => `<span class="osp-link">${match}</span>`);
+                    value.innerHTML = newText;
+
+                    value.querySelectorAll('.osp-link').forEach(el=>{
+                        el.addEventListener('click',()=>{
+                            const ospName = el.textContent.replace(/^OSP\s+/,'').trim();
+                            document.getElementById('search').value = ospName;
+                            filterField='Jednostka';
+                            currentPage=1; displayWozow();
+                            lightbox.style.display='none';
+                            history.pushState({search:ospName, field:'Jednostka'}, "", "");
+                        });
+                    });
+                }
+
+                row.appendChild(label); row.appendChild(value);
+                secDiv.appendChild(row);
             }
-
-        
- // Sekcja "Inne" – tylko nazwy OSP są klikane
-            if(f==='Inne'){
-    const ospRegex=/(przeniesiony do OSP [^,;\n]*)|(dawniej należał do OSP [^,;\n]*)/gi;
-    const text=valueText;
-    value.innerHTML = text.replace(ospRegex, match => {
-        // Rozbijamy match na prefix + nazwa OSP
-        const prefixMatch = match.match(/^(przeniesiony do |dawniej należał do )/i);
-        const prefix = prefixMatch ? prefixMatch[0] : '';
-        const ospName = match.replace(prefix, '');
-        return `${prefix}<span class="osp-link">${ospName}</span>`;
-    });
-
-    value.querySelectorAll('.osp-link').forEach(el=>{
-        el.addEventListener('click',()=>{
-            const ospName = el.textContent.trim();
-            document.getElementById('search').value = ospName;
-            filterField='Jednostka';
-            currentPage=1; displayWozow();
-            lightbox.style.display='none';
-            history.pushState({search:ospName, field:'Jednostka'}, "", "");
-        });
-    });
-}
-
-
-            row.appendChild(label);
-            row.appendChild(value);
-            secDiv.appendChild(row);
-        });
-
-        lbDetails.appendChild(secDiv);
-    });
-
-    lightbox.style.display='flex';
-}
-
-
-            row.appendChild(label);
-            row.appendChild(value);
-            secDiv.appendChild(row);
         });
 
         lbDetails.appendChild(secDiv);
