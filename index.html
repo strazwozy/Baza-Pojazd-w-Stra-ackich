@@ -3,151 +3,291 @@
 <head>
 <meta charset="UTF-8">
 <title>🚒 Baza wozów strażackich</title>
+
 <style>
-* { box-sizing: border-box; margin:0; padding:0; }
-html, body { width:100%; font-family: Arial; background:#1a1a1a; color:white; padding:20px; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial;background:#1a1a1a;color:#fff;padding:20px}
 
-h1 { text-align:center; margin-bottom:20px; font-size:32px; }
+h1{text-align:center;margin-bottom:20px}
 
-#search, #filterWoj, #sortBy, #sortDir {
-    margin:10px 5px;
-    padding:5px;
-    font-size:16px;
+input,select{
+    padding:6px;
     border-radius:6px;
     border:1px solid #ccc;
+    margin:5px;
 }
-#sortBy, #sortDir { background:#b30000; color:white; }
 
-#lista { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
-.woz {
-    background:#2a2a2a; padding:10px; border-radius:8px;
-    display:flex; flex-direction: column; align-items:center;
-    width:200px; cursor:pointer; transition:transform 0.2s;
+#sortBy,#sortDir{background:#b30000;color:#fff}
+
+#lista{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+
+.woz{
+    background:#2a2a2a;
+    width:200px;
+    padding:10px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:.2s;
 }
-.woz:hover { transform:scale(1.05); }
-.woz img { width:180px; height:120px; object-fit:cover; border-radius:6px; }
-.woz-info { width:100%; font-size:14px; }
+.woz:hover{transform:scale(1.05)}
 
-.status { font-weight:bold; }
+.woz img{
+    width:180px;
+    height:120px;
+    object-fit:cover;
+    border-radius:6px;
+    margin-bottom:8px;
+}
 
-#pagination { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; }
-.page-btn { padding:6px 10px; border:none; border-radius:6px; background:#b30000; color:white; cursor:pointer; }
-.page-btn.disabled { background:#555; cursor:default; }
+.woz-info strong{display:block}
 
-#lightbox {
-    display:none; position:fixed; inset:0;
+.status{font-weight:bold}
+
+#pagination{display:flex;gap:6px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.page-btn{background:#b30000;color:#fff;border:none;border-radius:6px;padding:6px 10px;cursor:pointer}
+.page-btn.disabled{background:#555}
+
+#lightbox{
+    display:none;
+    position:fixed;
+    inset:0;
     background:rgba(0,0,0,.95);
-    justify-content:center; align-items:center; z-index:1000;
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
 }
-#lightboxContent {
+
+#lightboxContent{
     background:#1a1a1a;
-    width:95%; height:95%;
-    display:flex; border-radius:15px; overflow:hidden;
-}
-#lightboxImg { max-width:80%; object-fit:contain; background:black; }
-#lightboxInfo { flex:1; overflow-y:auto; }
-#lightboxTitle { background:#E60000; padding:15px; text-align:center; font-size:26px; }
-
-.detail-row { display:flex; border-bottom:1px solid #444; padding:5px 0; }
-.detail-label { width:140px; font-weight:bold; }
-
-#closeLightbox {
-    position:absolute; top:10px; right:15px;
-    background:#b30000; width:40px; height:40px;
-    border-radius:50%; display:flex;
-    justify-content:center; align-items:center;
-    cursor:pointer; font-size:30px;
+    width:95%;
+    height:95%;
+    display:flex;
+    border-radius:15px;
+    overflow:hidden;
+    position:relative;
 }
 
-.osp-link {
+#lightboxImg{
+    width:70%;
+    object-fit:contain;
+    background:#000;
+}
+
+#lightboxInfo{
+    width:30%;
+    overflow-y:auto;
+}
+
+#lightboxTitle{
+    background:#e60000;
+    padding:12px;
+    font-size:26px;
+    text-align:center;
+    font-weight:bold;
+}
+
+#lightboxDetails{padding:15px}
+
+.detail-row{
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid rgba(255,255,255,.2);
+    padding:4px 0;
+}
+
+.detail-label{font-weight:bold}
+
+#closeLightbox{
+    position:absolute;
+    top:10px;
+    right:15px;
+    font-size:30px;
+    cursor:pointer;
+}
+
+#prevBtn,#nextBtn{
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:40px;
+    background:rgba(0,0,0,.5);
+    color:#fff;
+    border:none;
+    border-radius:50%;
+    width:50px;
+    height:50px;
+    cursor:pointer;
+}
+
+#prevBtn{left:10px}
+#nextBtn{right:10px}
+
+.osp-link{
     text-decoration:underline;
     cursor:pointer;
     color:inherit;
 }
 </style>
 </head>
+
 <body>
 
 <h1>🚒 Baza wozów strażackich</h1>
 
-<input id="search" placeholder="Szukaj...">
+<input id="search" placeholder="Szukaj ID, jednostki, marki...">
+
 <select id="filterWoj">
-  <option value="">Wszystkie województwa</option>
-  <option value="Mazowieckie">Mazowieckie</option>
+<option value="">Wszystkie województwa</option>
+<option>Mazowieckie</option>
+<option>Małopolskie</option>
+<option>Śląskie</option>
+<option>Pomorskie</option>
 </select>
 
 <select id="sortBy">
-  <option value="ID">ID</option>
-  <option value="Jednostka">Jednostka</option>
-  <option value="Marka">Marka</option>
-  <option value="Rok produkcji">Rok</option>
+<option value="ID">ID</option>
+<option value="Jednostka">Jednostka</option>
+<option value="Marka">Marka</option>
+<option value="Rok produkcji">Rok</option>
 </select>
 
 <select id="sortDir">
-  <option value="asc">⬆️ Rosnąco</option>
-  <option value="desc">⬇️ Malejąco</option>
+<option value="asc">⬆️ Rosnąco</option>
+<option value="desc">⬇️ Malejąco</option>
 </select>
 
 <div id="lista"></div>
 <div id="pagination"></div>
 
 <div id="lightbox">
-  <div id="lightboxContent">
-    <span id="closeLightbox">&times;</span>
-    <img id="lightboxImg">
-    <div id="lightboxInfo">
-      <h2 id="lightboxTitle"></h2>
-      <div id="lightboxDetails"></div>
-    </div>
-  </div>
+<button id="prevBtn">←</button>
+<div id="lightboxContent">
+<span id="closeLightbox">✕</span>
+<img id="lightboxImg">
+<div id="lightboxInfo">
+<div id="lightboxTitle"></div>
+<div id="lightboxDetails"></div>
+</div>
+</div>
+<button id="nextBtn">→</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
-const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
-let currentPage=1, itemsPerPage=80, filteredWozki=[], lightboxIndex=0, filterField=null;
+const csvUrl='https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
+
+let currentPage=1;
+const perPage=80;
+let filtered=[];
+let lbIndex=0;
+let filterField=null;
 
 Papa.parse(csvUrl,{
- download:true, header:true,
- complete:r=>{ window.wozy=r.data; displayWozow(); }
+download:true,
+header:true,
+complete:r=>{
+window.wozy=r.data;
+display();
+}
 });
 
-function displayWozow(){
- const sortBy=sortByEl.value, dir=sortDir.value;
- window.wozy.sort((a,b)=>{
-   const A=(a[sortBy]||'').toString().toLowerCase();
-   const B=(b[sortBy]||'').toString().toLowerCase();
-   return dir==='asc'
-     ? A.localeCompare(B,undefined,{numeric:true})
-     : B.localeCompare(A,undefined,{numeric:true});
- });
-
- filteredWozki=window.wozy;
- lista.innerHTML='';
- filteredWozki.slice((currentPage-1)*itemsPerPage,currentPage*itemsPerPage)
- .forEach((w,i)=>{
-   const d=document.createElement('div');
-   d.className='woz';
-   d.innerHTML=`<strong>${w.ID}</strong><br>${w.Jednostka}`;
-   d.onclick=()=>openLightbox(i);
-   lista.appendChild(d);
- });
+function statusColor(s){
+if(!s)return'#fff';
+s=s.toLowerCase();
+if(s==='czynny')return'green';
+if(['sprzedany','wycofany'].includes(s))return'red';
+return'yellow';
 }
 
-function openLightbox(i){
- const w=filteredWozki[i];
- lightbox.style.display='flex';
- lightboxTitle.textContent=`${w.Marka} (${w.ID})`;
- lightboxDetails.innerHTML='';
+function display(){
+const lista=document.getElementById('lista');
+const pag=document.getElementById('pagination');
+lista.innerHTML='';pag.innerHTML='';
+
+const q=document.getElementById('search').value.toLowerCase();
+const woj=document.getElementById('filterWoj').value;
+const sortBy=document.getElementById('sortBy').value;
+const sortDir=document.getElementById('sortDir').value;
+
+window.wozy.sort((a,b)=>{
+const A=(a[sortBy]||'').toString().toLowerCase();
+const B=(b[sortBy]||'').toString().toLowerCase();
+return sortDir==='asc'
+?A.localeCompare(B,undefined,{numeric:true})
+:B.localeCompare(A,undefined,{numeric:true});
+});
+
+filtered=window.wozy.filter(w=>{
+let ok=true;
+if(q){
+ok=filterField && w[filterField]
+?w[filterField].toLowerCase().includes(q)
+:Object.values(w).join(' ').toLowerCase().includes(q);
+}
+return ok && (!woj || w.Województwo===woj);
+});
+
+const pages=Math.ceil(filtered.length/perPage);
+const start=(currentPage-1)*perPage;
+
+filtered.slice(start,start+perPage).forEach((w,i)=>{
+const d=document.createElement('div');
+d.className='woz';
+d.innerHTML=`
+<img src="${w.Zdjęcie||''}">
+<div class="woz-info">
+<strong>${w.ID}</strong>
+${w.Jednostka}<br>
+${w.Marka} ${w['Rok produkcji']}<br>
+<span class="status" style="color:${statusColor(w.Status)}">${w.Status}</span>
+</div>`;
+d.onclick=()=>openLB(start+i);
+lista.appendChild(d);
+});
+
+for(let i=1;i<=pages;i++){
+const b=document.createElement('button');
+b.textContent=i;
+b.className='page-btn'+(i===currentPage?' disabled':'');
+b.onclick=()=>{currentPage=i;display()};
+pag.appendChild(b);
+}
 }
 
-search.oninput=()=>{currentPage=1;displayWozow();}
-sortByEl=sortBy; sortDir=sortDir;
-sortBy.onchange=sortDir.onchange=()=>displayWozow();
+function openLB(i){
+lbIndex=i;
+const w=filtered[lbIndex];
+document.getElementById('lightbox').style.display='flex';
+document.getElementById('lightboxImg').src=w.Zdjęcie||'';
+document.getElementById('lightboxTitle').textContent=`${w.Marka} (${w.ID})`;
+
+const det=document.getElementById('lightboxDetails');
+det.innerHTML='';
+
+[
+['🚨 Podstawowe',['ID','Marka','Rok produkcji','Rejestracja','Typ']],
+['📍 Lokalizacja',['Jednostka','Województwo','Powiat']],
+['⚡ Status',['Status']],
+['📝 Inne',['Inne']]
+].forEach(s=>{
+const h=document.createElement('h3');h.textContent=s[0];det.appendChild(h);
+s[1].forEach(f=>{
+if(!w[f])return;
+const r=document.createElement('div');r.className='detail-row';
+r.innerHTML=`<div class="detail-label">${f}</div><div>${w[f]}</div>`;
+det.appendChild(r);
+});
+});
+}
+
 closeLightbox.onclick=()=>lightbox.style.display='none';
-</script>
-</body>
-</html>
+prevBtn.onclick=()=>openLB(lbIndex-1<0?filtered.length-1:lbIndex-1);
+nextBtn.onclick=()=>openLB((lbIndex+1)%filtered.length);
 
+document.getElementById('search').oninput=()=>{currentPage=1;filterField=null;display()};
+filterWoj.onchange=()=>{currentPage=1;display()};
+sortBy.onchange=display;
+sortDir.onchange=()=>{currentPage=1;display()};
+</script>
 </body>
 </html>
