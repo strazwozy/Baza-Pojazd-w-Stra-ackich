@@ -290,6 +290,37 @@ lightboxImg.src=w.Zdjęcie||'';
 lightboxTitle.textContent=`${w.Marka||'-'} (${w.ID||'-'})`;
 lightboxDetails.innerHTML='';
 
+// ====== KLIKALNE POLA W LIGHTBOXIE → FILTR ======
+const clickableFields = [
+    'ID',
+    'Rejestracja',
+    'Województwo',
+    'Powiat',
+    'Rok produkcji',
+    'Jednostka'
+];
+
+if (clickableFields.includes(f)) {
+    value.style.cursor = 'pointer';
+    value.style.textDecoration = 'underline';
+
+    value.addEventListener('click', () => {
+        document.getElementById('search').value = w[f];
+        filterField = f;
+        currentPage = 1;
+
+        displayWozow();           // ⬅️ odświeża listę
+        lightbox.style.display='none'; // ⬅️ zamyka lightbox
+
+        history.pushState(
+            { search: w[f], field: f },
+            "",
+            ""
+        );
+    });
+}
+
+    
 [
 ['🚨 Podstawowe dane',['ID','Marka','Rok produkcji','Rejestracja','Typ']],
 ['📍 Lokalizacja',['Jednostka','Województwo','Powiat']],
