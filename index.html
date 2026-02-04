@@ -57,7 +57,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     font-size:32px;
     font-weight:bold;
     color:white;
-    background:#b30000; /* czerwona kulka */
+    background:#b30000;
     border-radius:50%;
     width:40px;
     height:40px;
@@ -260,53 +260,61 @@ function openLightbox(idx){
 
     sections.forEach(sec=>{
         const secDiv=document.createElement('div');
-        const secHeader=document.createElement('h3');
-        secHeader.innerHTML=sec.title;
-        secDiv.appendChild(secHeader);
+
+        // Nagłówek tylko dla wszystkich poza "Inne"
+        if(sec.title !== '📝 Inne'){
+            const secHeader=document.createElement('h3');
+            secHeader.innerHTML=sec.title;
+            secDiv.appendChild(secHeader);
+        }
 
         sec.fields.forEach(f=>{
-            if(w[f]){
-                const row=document.createElement('div'); row.className='detail-row';
-                const label=document.createElement('div'); label.className='detail-label'; label.textContent=f+':';
-                const value=document.createElement('div'); value.className='detail-value';
+            const valueText = w[f] || '-';
+            const row=document.createElement('div'); row.className='detail-row';
+            const label=document.createElement('div'); label.className='detail-label'; label.textContent=f+':';
+            const value=document.createElement('div'); value.className='detail-value';
 
-                if(f==='Status'){ value.style.color=getStatusColor(w[f]); }
-                else value.textContent=w[f];
+            if(f==='Status'){ value.style.color=getStatusColor(valueText); }
+            else value.textContent=valueText;
 
-                // Klikalne wartości
-                const clickableFields=['ID','Rejestracja','Województwo','Powiat','Rok produkcji','Jednostka'];
-                if(clickableFields.includes(f)){
-                    value.style.textDecoration='underline';
-                    value.style.cursor='pointer';
-                    value.addEventListener('click',()=>{
-                        document.getElementById('search').value=w[f];
-                        filterField = f;
+            // Klikalne pola
+            const clickableFields=['ID','Rejestracja','Województwo','Powiat','Rok produkcji','Jednostka'];
+            if(clickableFields.includes(f)){
+                value.style.textDecoration='underline';
+                value.style.cursor='pointer';
+                value.addEventListener('click',()=>{
+                    document.getElementById('search').value=valueText;
+                    filterField = f;
+                    currentPage=1; displayWozow();
+                    lightbox.style.display='none';
+                    history.pushState({search:valueText, field:f}, "", "");
+                });
+            }
+
+            // Sekcja "Inne" – tylko nazwy OSP są klikane
+            if(f==='Inne'){
+                const ospRegex=/(przeniesiony do OSP ([^,;\n]*))|(dawniej należał do OSP ([^,;\n]*))/gi;
+                const text=valueText;
+                value.innerHTML=text.replace(ospRegex, (_, p1, p2, p3, p4) => {
+                    const ospName = p2 || p4;
+                    return `<span class="osp-link">${ospName}</span>`;
+                });
+
+                value.querySelectorAll('.osp-link').forEach(el=>{
+                    el.addEventListener('click',()=>{
+                        const ospName = el.textContent.trim();
+                        document.getElementById('search').value = ospName;
+                        filterField='Jednostka';
                         currentPage=1; displayWozow();
                         lightbox.style.display='none';
-                        history.pushState({search:w[f], field:f}, "", "");
+                        history.pushState({search:ospName, field:'Jednostka'}, "", "");
                     });
-                }
-
-                if(f==='Inne'){
-                    const ospRegex=/(przeniesiony do OSP [^,;\n]*)|(dawniej należał do OSP [^,;\n]*)/gi;
-                    const text=w[f];
-                    const newText=text.replace(ospRegex, match=>`<span class="osp-link">${match}</span>`);
-                    value.innerHTML=newText;
-                    value.querySelectorAll('.osp-link').forEach(el=>{
-                        el.addEventListener('click',()=>{
-                            const ospName=el.textContent.replace(/^(przeniesiony do |dawniej należał do )/, '');
-                            document.getElementById('search').value=ospName.trim();
-                            filterField='Jednostka';
-                            currentPage=1; displayWozow();
-                            lightbox.style.display='none';
-                            history.pushState({search:ospName, field:'Jednostka'}, "", "");
-                        });
-                    });
-                }
-
-                row.appendChild(label); row.appendChild(value);
-                secDiv.appendChild(row);
+                });
             }
+
+            row.appendChild(label);
+            row.appendChild(value);
+            secDiv.appendChild(row);
         });
 
         lbDetails.appendChild(secDiv);
