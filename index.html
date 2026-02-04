@@ -50,7 +50,25 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 .detail-value { flex-grow:1; }
 
 /* Lightbox przyciski */
-#closeLightbox { position:absolute; top:10px; right:15px; font-size:32px; font-weight:bold; color:white; background:none; border:none; cursor:pointer; z-index:1001; }
+#closeLightbox {
+    position:absolute;
+    top:10px;
+    right:15px;
+    font-size:32px;
+    font-weight:bold;
+    color:white;
+    background:#b30000; /* czerwona kulka */
+    border-radius:50%;
+    width:40px;
+    height:40px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    z-index:1001;
+}
+#closeLightbox:hover { background:#ff1a1a; }
+
 #prevBtn, #nextBtn { position:absolute; top:50%; transform:translateY(-50%); font-size:50px; color:white; background: rgba(0,0,0,0.4); border:none; padding:20px; cursor:pointer; border-radius:50%; z-index:1001; }
 #prevBtn { left:10px; } #nextBtn { right:10px; }
 
