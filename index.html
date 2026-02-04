@@ -7,10 +7,10 @@
 * { box-sizing: border-box; margin:0; padding:0; }
 html, body { width:100%; font-family: Arial; background:#1a1a1a; color:white; padding:20px; }
 
-/* Nagłówek strony */
+/* Nagłówek */
 h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 
-/* Formularze filtrów */
+/* Filtry i sortowanie */
 #search, #filterWoj, #sortBy {
     margin:10px 5px; padding:5px; font-size:16px; border-radius:6px; border:1px solid #ccc;
 }
@@ -21,8 +21,10 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 .woz { background:#2a2a2a; padding:10px; border-radius:8px; display:flex; flex-direction: column; align-items:center; width:200px; box-shadow:0 2px 5px rgba(0,0,0,0.5); cursor:pointer; transition:transform 0.2s; }
 .woz:hover { transform:scale(1.05); }
 .woz img { width:180px; height:120px; object-fit:cover; border-radius:6px; margin-bottom:10px; }
-.woz-info { display:flex; flex-direction: column; gap:3px; text-align:left; width:100%; }
+.woz-info { display:flex; flex-direction: column; gap:5px; text-align:left; width:100%; }
 .woz-info strong { display:inline-block; width:90px; }
+
+/* Status */
 .status { font-weight:bold; }
 
 /* Stronicowanie */
@@ -30,42 +32,41 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 .page-btn { padding:8px 12px; border-radius:6px; border:none; cursor:pointer; background:#b30000; color:white; }
 .page-btn.disabled { background:#555; cursor:default; }
 
-/* Lightbox pełny ekran */
+/* Lightbox */
 #lightbox {
     display:none; position:fixed; top:0; left:0; width:100%; height:100%;
     background: rgba(0,0,0,0.95); justify-content:center; align-items:center; z-index:1000;
 }
 #lightboxContent {
     background:#1a1a1a;
-    background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.05), rgba(255,255,255,0.05) 1px, transparent 1px, transparent 8px);
     display:flex; flex-direction:row; width:95%; max-width:1600px; height:95%; border-radius:15px; overflow:hidden; color:white; position:relative; box-shadow:0 0 20px rgba(0,0,0,0.6);
 }
 #lightboxImg { max-width:80%; max-height:100%; object-fit:contain; background:#000; }
 #lightboxInfo { flex:1; display:flex; flex-direction:column; overflow-y:auto; background:#1a1a1a; }
 #lightboxTitle { background:#E60000; padding:15px; font-size:28px; text-align:center; width:100%; flex-shrink:0; font-weight:bold; }
-#lightboxDetails { padding:15px; flex:1; font-size:16px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; }
+#lightboxDetails { padding:15px; flex:1; font-size:16px; display:flex; flex-direction:column; gap:8px; overflow-y:auto; }
+.detail-row { display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.2); }
+.detail-label { font-weight:bold; min-width:130px; }
+.detail-value { flex-grow:1; }
 
-.detail-section { margin-bottom:15px; }
-.detail-section h3 { margin-bottom:5px; }
-.detail-row { display:flex; justify-content:flex-start; padding:2px 0; }
-.detail-label { font-weight:bold; min-width:120px; margin-right:10px; }
-.detail-value { flex-grow:1; cursor:pointer; }
-
+/* Lightbox przyciski */
 #closeLightbox { position:absolute; top:10px; right:15px; font-size:32px; font-weight:bold; color:white; background:none; border:none; cursor:pointer; z-index:1001; }
 #prevBtn, #nextBtn { position:absolute; top:50%; transform:translateY(-50%); font-size:50px; color:white; background: rgba(0,0,0,0.4); border:none; padding:20px; cursor:pointer; border-radius:50%; z-index:1001; }
 #prevBtn { left:10px; } #nextBtn { right:10px; }
 
+/* Responsywność */
 @media (max-width:1000px){
   #lightboxContent { flex-direction: column; width:95%; height:90%; }
   #lightboxImg { max-width:100%; max-height:50%; }
   #prevBtn, #nextBtn { font-size:30px; padding:10px; }
   #lista { flex-direction:column; align-items:center; }
 }
+.osp-link { text-decoration:underline; cursor:pointer; color:#00f; }
 </style>
 </head>
 <body>
 
-<h1>🚒 Baza wozów strażackich w Polsce</h1>
+<h1>🚒 Baza wozów strażackich</h1>
 
 <input type="text" id="search" placeholder="Szukaj jednostki, ID, rejestracji, marki...">
 <select id="filterWoj">
@@ -98,6 +99,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 <div id="lista"></div>
 <div id="pagination"></div>
 
+<!-- Lightbox -->
 <div id="lightbox">
   <button id="prevBtn">&#8592;</button>
   <div id="lightboxContent">
@@ -119,6 +121,7 @@ const itemsPerPage = 80;
 let filteredWozki = [];
 let lightboxIndex = 0;
 
+// Pobranie danych CSV
 Papa.parse(csvUrl, { download:true, header:true, skipEmptyLines:true, complete:function(results){
     window.wozy = results.data;
     displayWozow();
@@ -145,9 +148,9 @@ function displayWozow(){
 
     // Sortowanie
     window.wozy.sort((a,b)=>{
-        const valA = (a[sortBy] || '').toString().toLowerCase();
-        const valB = (b[sortBy] || '').toString().toLowerCase();
-        return valA.localeCompare(valB);
+        const valA=(a[sortBy]||'').toString().toLowerCase();
+        const valB=(b[sortBy]||'').toString().toLowerCase();
+        return valA.localeCompare(valB, undefined, {numeric:true});
     });
 
     filteredWozki = window.wozy.filter(w=>{
@@ -160,22 +163,21 @@ function displayWozow(){
     });
 
     const totalPages=Math.ceil(filteredWozki.length/itemsPerPage);
-    if(currentPage>totalPages) currentPage=totalPages || 1;
+    if(currentPage>totalPages) currentPage=totalPages||1;
 
     const start=(currentPage-1)*itemsPerPage;
     const end=start+itemsPerPage;
     const pageItems=filteredWozki.slice(start,end);
 
     pageItems.forEach((w,i)=>{
-        const div=document.createElement('div');
-        div.className='woz';
+        const div=document.createElement('div'); div.className='woz';
         div.innerHTML=`
             <img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}" alt="${w.Jednostka}">
             <div class="woz-info">
-                <strong>ID:</strong> ${w.ID||'-'}<br>
-                <strong>Jednostka:</strong> ${w.Jednostka||'-'}<br>
-                <strong>Marka:</strong> ${w.Marka||'-'}<br>
-                <strong>Rok:</strong> ${w['Rok produkcji']||'-'}<br>
+                <strong>ID:</strong> ${w.ID||'-'}
+                <strong>Jednostka:</strong> ${w.Jednostka||'-'}
+                <strong>Marka:</strong> ${w.Marka||'-'}
+                <strong>Rok:</strong> ${w['Rok produkcji']||'-'}
                 <strong>Status:</strong> <span class="status" style="color:${getStatusColor(w.Status)}">${w.Status||'-'}</span>
             </div>
         `;
@@ -185,18 +187,17 @@ function displayWozow(){
 
     // Stronicowanie
     if(totalPages>1){
-        const prev=document.createElement('button'); prev.textContent='Prev'; prev.className='page-btn'; prev.disabled=currentPage===1; if(currentPage===1) prev.classList.add('disabled');
+        const prev=document.createElement('button'); prev.textContent='Prev'; prev.className='page-btn'; if(currentPage===1){prev.disabled=true; prev.classList.add('disabled');}
         prev.addEventListener('click',()=>{ currentPage--; displayWozow(); });
         pagination.appendChild(prev);
 
         for(let p=1;p<=totalPages;p++){
-            const btn=document.createElement('button');
-            btn.textContent=p; btn.className='page-btn'; if(p===currentPage) btn.classList.add('disabled');
+            const btn=document.createElement('button'); btn.textContent=p; btn.className='page-btn'; if(p===currentPage) btn.classList.add('disabled');
             btn.addEventListener('click',()=>{ currentPage=p; displayWozow(); });
             pagination.appendChild(btn);
         }
 
-        const next=document.createElement('button'); next.textContent='Next'; next.className='page-btn'; next.disabled=currentPage===totalPages; if(currentPage===totalPages) next.classList.add('disabled');
+        const next=document.createElement('button'); next.textContent='Next'; next.className='page-btn'; if(currentPage===totalPages){next.disabled=true; next.classList.add('disabled');}
         next.addEventListener('click',()=>{ currentPage++; displayWozow(); });
         pagination.appendChild(next);
     }
@@ -220,42 +221,69 @@ function openLightbox(idx){
     if(lightboxIndex<0) lightboxIndex=filteredWozki.length-1;
     if(lightboxIndex>=filteredWozki.length) lightboxIndex=0;
     const w=filteredWozki[lightboxIndex];
-
     lbImg.src=w.Zdjęcie||'https://via.placeholder.com/800x600?text=Brak+zdjęcia';
-    lbTitle.textContent=w.Marka||'-';
+    lbTitle.textContent=`${w.Marka||'-'} (ID: ${w.ID||'-'})`;
     lbDetails.innerHTML='';
 
-    // Sekcje z emotkami
-    const sekcje = [
-        {title:'🚨 Podstawowe 🚨', fields:['ID','Marka','Rok produkcji','Rejestracja','Typ']},
-        {title:'📍 Lokalizacja 📍', fields:['Jednostka','Województwo','Powiat']},
-        {title:'📣 Status 📣', fields:['Status']},
-        {title:'💥 Inne 💥 ', fields:['Inne']}
+    const sections=[
+        {title:'🚨 Podstawowe dane', fields:['ID','Marka','Rok produkcji','Rejestracja','Typ']},
+        {title:'📍 Lokalizacja', fields:['Jednostka','Województwo','Powiat']},
+        {title:'⚡ Status', fields:['Status']},
+        {title:'📝 Inne', fields:['Inne']}
     ];
 
-    sekcje.forEach(sec=>{
-        const secDiv=document.createElement('div'); secDiv.className='detail-section';
-        const secH=document.createElement('h3'); secH.textContent=sec.title; secDiv.appendChild(secH);
+    sections.forEach(sec=>{
+        const secDiv=document.createElement('div');
+        const secHeader=document.createElement('h3');
+        secHeader.innerHTML=sec.title;
+        secDiv.appendChild(secHeader);
+
         sec.fields.forEach(f=>{
             if(w[f]){
                 const row=document.createElement('div'); row.className='detail-row';
                 const label=document.createElement('div'); label.className='detail-label'; label.textContent=f+':';
                 const value=document.createElement('div'); value.className='detail-value';
                 value.textContent=w[f];
-                // Klikalna jednostka
-                if(f==='Jednostka'){
+
+                // Klikalne wartości
+                const makeFilterClickable=(text)=>{
                     value.style.textDecoration='underline';
-                    value.addEventListener('click',()=>{ 
-                        document.getElementById('search').value=w[f];
-                        currentPage=1; displayWozow(); 
+                    value.style.cursor='pointer';
+                    value.addEventListener('click',()=>{
+                        document.getElementById('search').value=text;
+                        currentPage=1; displayWozow();
                         lightbox.style.display='none';
                     });
+                };
+
+                if(['ID','Rejestracja','Województwo','Powiat','Rok produkcji','Jednostka'].includes(f)){
+                    makeFilterClickable(w[f]);
                 }
+
                 if(f==='Status'){ value.style.color=getStatusColor(w[f]); }
+
+                if(f==='Inne'){
+                    const ospRegex=/(przeniesiony do OSP [^,;\n]*)|(dawniej należał do OSP [^,;\n]*)/gi;
+                    const text=w[f];
+                    const newText=text.replace(ospRegex, match=>{
+                        return `<span class="osp-link">${match}</span>`;
+                    });
+                    value.innerHTML=newText;
+                    value.querySelectorAll('.osp-link').forEach(el=>{
+                        el.addEventListener('click',()=>{
+                            const ospName=el.textContent.replace(/^(przeniesiony do |dawniej należał do )/,'');
+                            document.getElementById('search').value=ospName.trim();
+                            currentPage=1; displayWozow();
+                            lightbox.style.display='none';
+                        });
+                    });
+                }
+
                 row.appendChild(label); row.appendChild(value);
                 secDiv.appendChild(row);
             }
         });
+
         lbDetails.appendChild(secDiv);
     });
 
@@ -263,8 +291,8 @@ function openLightbox(idx){
 }
 
 closeBtn.addEventListener('click',()=>lightbox.style.display='none');
-prevBtn.addEventListener('click',()=>{ openLightbox(lightboxIndex-1); });
-nextBtn.addEventListener('click',()=>{ openLightbox(lightboxIndex+1); });
+prevBtn.addEventListener('click',()=>openLightbox(lightboxIndex-1));
+nextBtn.addEventListener('click',()=>openLightbox(lightboxIndex+1));
 
 document.addEventListener('keydown',e=>{
     if(lightbox.style.display==='flex'){
@@ -276,4 +304,3 @@ document.addEventListener('keydown',e=>{
 </script>
 </body>
 </html>
-
