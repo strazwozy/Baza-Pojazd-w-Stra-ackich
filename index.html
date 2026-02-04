@@ -254,7 +254,7 @@ const nextBtn=document.getElementById('nextBtn');
     const w = filteredWozki[lightboxIndex];
 
     lbImg.src = w.Zdjęcie || 'https://via.placeholder.com/800x600?text=Brak+zdjęcia';
-    lbTitle.textContent = `${w.Marka||'-'} (ID: ${w.ID||'-'})`;
+    lbTitle.textContent = `${w.Marka||'-'} (${w.ID||'-'})`;
     lbDetails.innerHTML = '';
 
     const sections = [
