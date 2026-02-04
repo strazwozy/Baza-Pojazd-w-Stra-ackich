@@ -295,22 +295,26 @@ const nextBtn=document.getElementById('nextBtn');
                 }
 
                 // Sekcja Inne – tylko nazwy OSP są klikane, reszta tekstu nie
-                if(f==='Inne'){
-                    const text = w[f];
-                    const newText = text.replace(/(OSP [\w\sąęłóńżźć]+)/gi, match => `<span class="osp-link">${match}</span>`);
-                    value.innerHTML = newText;
+               if(f==='Inne'){
+    const text = w[f];
+    // Zamieniamy tylko nazwy OSP na klikane, reszta tekstu bez zmian
+    const newText = text.replace(/(OSP [\w\sąęłóńżźć]+)/gi, match => `<span class="osp-link">${match}</span>`);
+    value.innerHTML = newText;
 
-                    value.querySelectorAll('.osp-link').forEach(el=>{
-                        el.addEventListener('click',()=>{
-                            const ospName = el.textContent.replace(/^OSP\s+/,'').trim();
-                            document.getElementById('search').value = ospName;
-                            filterField='Jednostka';
-                            currentPage=1; displayWozow();
-                            lightbox.style.display='none';
-                            history.pushState({search:ospName, field:'Jednostka'}, "", "");
-                        });
-                    });
-                }
+    // Dodajemy kliknięcie tylko na nazwę OSP
+    value.querySelectorAll('.osp-link').forEach(el=>{
+        el.addEventListener('click',()=>{
+            const ospName = el.textContent.trim(); // cała nazwa OSP
+            document.getElementById('search').value = ospName;
+            filterField='Jednostka';
+            currentPage=1; 
+            displayWozow();
+            lightbox.style.display='none';
+            history.pushState({search:ospName, field:'Jednostka'}, "", "");
+        });
+    });
+}
+
 
                 row.appendChild(label); row.appendChild(value);
                 secDiv.appendChild(row);
