@@ -291,7 +291,8 @@ function openLightbox(idx){
                 });
             }
 
-            // Sekcja "Inne" – tylko nazwy OSP są klikane
+        
+ // Sekcja "Inne" – tylko nazwy OSP są klikane
             if(f==='Inne'){
     const ospRegex=/(przeniesiony do OSP [^,;\n]*)|(dawniej należał do OSP [^,;\n]*)/gi;
     const text=valueText;
@@ -313,6 +314,18 @@ function openLightbox(idx){
             history.pushState({search:ospName, field:'Jednostka'}, "", "");
         });
     });
+}
+
+
+            row.appendChild(label);
+            row.appendChild(value);
+            secDiv.appendChild(row);
+        });
+
+        lbDetails.appendChild(secDiv);
+    });
+
+    lightbox.style.display='flex';
 }
 
 
