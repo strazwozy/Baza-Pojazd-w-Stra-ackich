@@ -253,13 +253,29 @@ function render(){
     filtered.slice(start,end).forEach((w,i)=>{
         const d=document.createElement('div');
         d.className='woz';
-        d.innerHTML=`
-            <img src="${w.Zdjęcie||'https://via.placeholder.com/300x200?text=Brak+zdjęcia'}">
-            <strong>ID:</strong> ${w.ID||'-'}
-            <strong>Jednostka:</strong> ${w.Jednostka||'-'}
-            <strong>Status:</strong>
-            <span class="status" style="color:${statusColor(w.Status)}">${w.Status||'-'}</span>
-        `;
+      d.innerHTML = `
+    <img src="${w.Zdjęcie || 'https://via.placeholder.com/300x200?text=Brak+zdjęcia'}">
+
+    <div class="woz-info">
+        <strong>ID:</strong> ${w.ID || '-'}
+
+        <strong>Jednostka:</strong> ${w.Jednostka || '-'}
+
+        <strong>Marka:</strong> ${w.Marka || '-'}
+
+        <strong>Rok:</strong> ${w['Rok produkcji'] || '-'}
+
+        <strong>Województwo:</strong> ${w.Województwo || '-'}
+
+        <strong>Inne:</strong> ${w.Inne || '-'}
+
+        <strong>Status:</strong>
+        <span class="status" style="color:${statusColor(w.Status)}">
+            ${w.Status || '-'}
+        </span>
+    </div>
+`;
+
         d.onclick=()=>openLightbox(start+i);
         list.appendChild(d);
     });
