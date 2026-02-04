@@ -299,21 +299,23 @@ const nextBtn=document.getElementById('nextBtn');
                     });
                 }
 
-                // Sekcja Inne – tylko nazwy OSP są klikane, reszta tekstu nie
-               if(f==='Inne'){
+                // Sekcja Inne – tylko nazwy jednostek są klikane
+if(f==='Inne'){
     const text = w[f];
-    // Zamieniamy tylko nazwy OSP na klikane, reszta tekstu bez zmian
-    const newText = text.replace(/(OSP [\w\sąęłóńżźć]+)/gi, match => `<span class="osp-link">${match}</span>`);
+
+    // Regex dla OSP + dodatkowych skrótów
+    const unitRegex = /\b(?:OSP|JRG|PSP|ZSP|WSP|LSRG|ZSR|KSRG)\s+[\w\sąęłóńżźć]+/gi;
+
+    const newText = text.replace(unitRegex, match => `<span class="osp-link">${match}</span>`);
     value.innerHTML = newText;
 
-    // Dodajemy kliknięcie tylko na nazwę OSP
     value.querySelectorAll('.osp-link').forEach(el=>{
         el.addEventListener('click',()=>{
-            const ospName = el.textContent.trim(); // cała nazwa OSP
+            // Usuwamy tylko skrót i spacje z przodu
+            const ospName = el.textContent.replace(/^(OSP|JRG|PSP|ZSP|WSP|LSRG|ZSR|KSRG)\s+/i,'').trim();
             document.getElementById('search').value = ospName;
             filterField='Jednostka';
-            currentPage=1; 
-            displayWozow();
+            currentPage=1; displayWozow();
             lightbox.style.display='none';
             history.pushState({search:ospName, field:'Jednostka'}, "", "");
         });
