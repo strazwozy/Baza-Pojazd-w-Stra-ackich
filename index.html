@@ -293,24 +293,28 @@ function openLightbox(idx){
 
             // Sekcja "Inne" – tylko nazwy OSP są klikane
             if(f==='Inne'){
-                const ospRegex=/(przeniesiony do OSP ([^,;\n]*))|(dawniej należał do OSP ([^,;\n]*))/gi;
-                const text=valueText;
-                value.innerHTML=text.replace(ospRegex, (_, p1, p2, p3, p4) => {
-                    const ospName = p2 || p4;
-                    return `<span class="osp-link">${ospName}</span>`;
-                });
+    const ospRegex=/(przeniesiony do OSP [^,;\n]*)|(dawniej należał do OSP [^,;\n]*)/gi;
+    const text=valueText;
+    value.innerHTML = text.replace(ospRegex, match => {
+        // Rozbijamy match na prefix + nazwa OSP
+        const prefixMatch = match.match(/^(przeniesiony do |dawniej należał do )/i);
+        const prefix = prefixMatch ? prefixMatch[0] : '';
+        const ospName = match.replace(prefix, '');
+        return `${prefix}<span class="osp-link">${ospName}</span>`;
+    });
 
-                value.querySelectorAll('.osp-link').forEach(el=>{
-                    el.addEventListener('click',()=>{
-                        const ospName = el.textContent.trim();
-                        document.getElementById('search').value = ospName;
-                        filterField='Jednostka';
-                        currentPage=1; displayWozow();
-                        lightbox.style.display='none';
-                        history.pushState({search:ospName, field:'Jednostka'}, "", "");
-                    });
-                });
-            }
+    value.querySelectorAll('.osp-link').forEach(el=>{
+        el.addEventListener('click',()=>{
+            const ospName = el.textContent.trim();
+            document.getElementById('search').value = ospName;
+            filterField='Jednostka';
+            currentPage=1; displayWozow();
+            lightbox.style.display='none';
+            history.pushState({search:ospName, field:'Jednostka'}, "", "");
+        });
+    });
+}
+
 
             row.appendChild(label);
             row.appendChild(value);
