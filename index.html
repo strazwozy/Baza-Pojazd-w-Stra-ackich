@@ -283,7 +283,7 @@ function displayWozow(){
     }
 }
 
-// Lightbox + OSP/JRG/KSRG klik
+// Lightbox z przekierowaniami dla wszystkich klikanych pól
 function openLightbox(i){
     lightboxIndex=i;
     const w=filteredWozki[lightboxIndex];
@@ -292,6 +292,7 @@ function openLightbox(i){
     lightboxTitle.textContent=`${w.Marka||'-'} (${w.ID||'-'})`;
     lightboxDetails.innerHTML='';
 
+    // Sekcje lightboxa
     [
     ['🚨 Podstawowe dane',['ID','Marka','Rok produkcji','Rejestracja','Typ']],
     ['📍 Lokalizacja',['Jednostka','Województwo','Powiat']],
@@ -303,9 +304,10 @@ function openLightbox(i){
             if(!w[f]) return;
             const r=document.createElement('div'); r.className='detail-row';
             const label=document.createElement('div'); label.className='detail-label'; label.textContent=f;
-            const value=document.createElement('div'); value.className='detail-value'; value.textContent=w[f];
+            const value=document.createElement('div'); value.className='detail-value';
 
             if(f==='Inne'){
+                // regex tylko dla OSP/JRG/etc
                 const unitRegex = /\b(?:OSP|JRG|PSP|ZSP|WSP|LSRG|ZSR|KSRG)\s+[\w\sąęłóńżźć]+/gi;
                 value.innerHTML=w[f].replace(unitRegex,m=>`<span class="osp-link">${m}</span>`);
                 value.querySelectorAll('.osp-link').forEach(el=>{
@@ -318,13 +320,30 @@ function openLightbox(i){
                         lightbox.style.display='none';
                     });
                 });
+            } else {
+                value.textContent = w[f];
+                // Lista pól klikanych do filtrów
+                const clickableFields = ['ID','Jednostka','Marka','Rejestracja','Rok produkcji','Powiat','Województwo'];
+                if(clickableFields.includes(f)){
+                    value.style.textDecoration='underline';
+                    value.style.cursor='pointer';
+                    value.addEventListener('click',()=>{
+                        document.getElementById('search').value = w[f];
+                        filterField = f==='Rok produkcji'?'Rok produkcji':f;
+                        currentPage = 1;
+                        displayWozow();
+                        lightbox.style.display='none';
+                    });
+                }
             }
 
-            r.appendChild(label); r.appendChild(value);
+            r.appendChild(label);
+            r.appendChild(value);
             lightboxDetails.appendChild(r);
         });
     });
 }
+
 
 closeLightbox.onclick=()=>lightbox.style.display='none';
 prevBtn.onclick=()=>openLightbox((lightboxIndex-1+filteredWozki.length)%filteredWozki.length);
