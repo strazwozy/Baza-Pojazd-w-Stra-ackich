@@ -8,10 +8,8 @@
 * { box-sizing: border-box; margin:0; padding:0; }
 html, body { width:100%; font-family: Arial; background:#1a1a1a; color:white; padding:20px; }
 
-/* Nagłówek */
 h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 
-/* Filtry i sortowanie */
 #search, #filterWoj, #sortBy, #sortDir {
     margin:10px 5px;
     padding:5px;
@@ -21,7 +19,6 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 }
 #sortBy, #sortDir { background:#b30000; color:white; }
 
-/* Lista wozów */
 #lista { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
 .woz {
     background:#2a2a2a;
@@ -44,17 +41,13 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     margin-bottom:10px;
 }
 .woz-info { display:flex; flex-direction: column; gap:5px; text-align:left; width:100%; }
-.woz-info strong { display:inline-block; width:90px; }
 
-/* Status */
 .status { font-weight:bold; }
 
-/* Stronicowanie */
 #pagination { display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
 .page-btn { padding:8px 12px; border-radius:6px; border:none; cursor:pointer; background:#b30000; color:white; }
 .page-btn.disabled { background:#555; cursor:default; }
 
-/* Lightbox */
 #lightbox {
     display:none;
     position:fixed;
@@ -75,7 +68,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     position:relative;
 }
 #lightboxImg { max-width:80%; max-height:100%; object-fit:contain; background:#000; }
-#lightboxInfo { flex:1; display:flex; flex-direction:column; overflow-y:auto; }
+#lightboxInfo { flex:1; overflow-y:auto; }
 #lightboxTitle {
     background:#E60000;
     padding:15px;
@@ -83,7 +76,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     text-align:center;
     font-weight:bold;
 }
-#lightboxDetails { padding:15px; display:flex; flex-direction:column; gap:8px; }
+#lightboxDetails { padding:15px; }
 
 .detail-row {
     display:flex;
@@ -141,21 +134,10 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 
 <select id="filterWoj">
 <option value="">Wszystkie województwa</option>
-<option value="Małopolskie">Małopolskie</option>
-<option value="Mazowieckie">Mazowieckie</option>
-<option value="Pomorskie">Pomorskie</option>
-<option value="Wielkopolskie">Wielkopolskie</option>
-<option value="Dolnośląskie">Dolnośląskie</option>
-<option value="Śląskie">Śląskie</option>
-<option value="Łódzkie">Łódzkie</option>
-<option value="Lubelskie">Lubelskie</option>
-<option value="Lubuskie">Lubuskie</option>
-<option value="Opolskie">Opolskie</option>
-<option value="Podkarpackie">Podkarpackie</option>
-<option value="Podlaskie">Podlaskie</option>
-<option value="Świętokrzyskie">Świętokrzyskie</option>
-<option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
-<option value="Zachodniopomorskie">Zachodniopomorskie</option>
+<option>Mazowieckie</option>
+<option>Małopolskie</option>
+<option>Pomorskie</option>
+<option>Śląskie</option>
 </select>
 
 <select id="sortBy">
@@ -167,8 +149,8 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 </select>
 
 <select id="sortDir">
-<option value="asc">Rosnąco ⬆️</option>
-<option value="desc">Malejąco ⬇️</option>
+<option value="asc">Rosnąco</option>
+<option value="desc">Malejąco</option>
 </select>
 
 <div id="lista"></div>
@@ -191,89 +173,55 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 <script>
 const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
 
-let currentPage = 1;
-const itemsPerPage = 80;
-let filteredWozki = [];
-let lightboxIndex = 0;
-let filterField = null;
+let currentPage=1, itemsPerPage=80, filteredWozki=[], lightboxIndex=0, filterField=null;
 
 Papa.parse(csvUrl,{
-download:true,
-header:true,
-skipEmptyLines:true,
-complete:r=>{
-window.wozy=r.data;
-displayWozow();
-}
+download:true, header:true, skipEmptyLines:true,
+complete:r=>{ window.wozy=r.data; displayWozow(); }
 });
-
-function getStatusColor(status){
-if(!status) return 'white';
-const s=status.toLowerCase();
-if(s==='czynny') return 'green';
-if(['wycofany ze służby','sprzedany','rozbity','spłonął'].includes(s)) return 'red';
-if(s==='przeniesiony') return 'yellow';
-if(s==='obiekt muzeum') return 'blue';
-if(s==='porzucony') return 'orange';
-return 'white';
-}
 
 function displayWozow(){
 const lista=document.getElementById('lista');
 const pagination=document.getElementById('pagination');
-lista.innerHTML='';
-pagination.innerHTML='';
+lista.innerHTML=''; pagination.innerHTML='';
 
-const q=document.getElementById('search').value.toLowerCase();
-const woj=document.getElementById('filterWoj').value;
-const sortBy=document.getElementById('sortBy').value;
-const sortDir=document.getElementById('sortDir').value;
+const q=search.value.toLowerCase();
+const woj=filterWoj.value;
+const sortBy=sortBySelect.value;
+const sortDir=sortDirSelect.value;
 
 window.wozy.sort((a,b)=>{
-const A=(a[sortBy]||'').toString().toLowerCase();
-const B=(b[sortBy]||'').toString().toLowerCase();
+const A=(a[sortBy]||'').toLowerCase();
+const B=(b[sortBy]||'').toLowerCase();
 return sortDir==='asc'
 ?A.localeCompare(B,undefined,{numeric:true})
 :B.localeCompare(A,undefined,{numeric:true});
 });
 
-filteredWozki = window.wozy.filter(w=>{
-let ok=true;
-if(q){
-if(filterField && w[filterField]){
-ok = w[filterField].toLowerCase().includes(q);
-}else{
-ok =
-(w.Jednostka||'').toLowerCase().includes(q) ||
-(w.ID||'').toLowerCase().includes(q) ||
-(w.Rejestracja||'').toLowerCase().includes(q) ||
-(w.Marka||'').toLowerCase().includes(q);
-}
-}
+filteredWozki=window.wozy.filter(w=>{
+let ok=!q ||
+(filterField && (w[filterField]||'').toLowerCase().includes(q)) ||
+(!filterField && Object.values(w).join(' ').toLowerCase().includes(q));
 return ok && (!woj || w.Województwo===woj);
 });
 
-const totalPages=Math.ceil(filteredWozki.length/itemsPerPage);
 const start=(currentPage-1)*itemsPerPage;
-
 filteredWozki.slice(start,start+itemsPerPage).forEach((w,i)=>{
-const div=document.createElement('div');
-div.className='woz';
-div.innerHTML=`
-<img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}">
+const d=document.createElement('div');
+d.className='woz';
+d.innerHTML=`<img src="${w.Zdjęcie||''}">
 <div class="woz-info">
-<strong>ID:</strong> ${w.ID||'-'}
-<strong>Jednostka:</strong> ${w.Jednostka||'-'}
-<strong>Marka:</strong> ${w.Marka||'-'}
-<strong>Rok:</strong> ${w['Rok produkcji']||'-'}
-<strong>Status:</strong>
-<span class="status" style="color:${getStatusColor(w.Status)}">${w.Status||'-'}</span>
+<b>ID:</b> ${w.ID||'-'}
+<b>Jednostka:</b> ${w.Jednostka||'-'}
+<b>Marka:</b> ${w.Marka||'-'}
+<b>Rok:</b> ${w['Rok produkcji']||'-'}
+<b>Status:</b> ${w.Status||'-'}
 </div>`;
-div.onclick=()=>openLightbox(start+i);
-lista.appendChild(div);
+d.onclick=()=>openLightbox(start+i);
+lista.appendChild(d);
 });
 
-for(let i=1;i<=totalPages;i++){
+for(let i=1;i<=Math.ceil(filteredWozki.length/itemsPerPage);i++){
 const b=document.createElement('button');
 b.textContent=i;
 b.className='page-btn'+(i===currentPage?' disabled':'');
@@ -284,59 +232,68 @@ pagination.appendChild(b);
 
 function openLightbox(i){
 lightboxIndex=i;
-const w=filteredWozki[lightboxIndex];
+const w=filteredWozki[i];
 lightbox.style.display='flex';
 lightboxImg.src=w.Zdjęcie||'';
-lightboxTitle.textContent=`${w.Marka||'-'} (${w.ID||'-'})`;
+lightboxTitle.textContent=`${w.Marka||'-'} (${w.ID||''})`;
 lightboxDetails.innerHTML='';
 
-// ====== KLIKALNE POLA W LIGHTBOXIE → FILTR ======
-const clickableFields = [
-    'ID',
-    'Rejestracja',
-    'Województwo',
-    'Powiat',
-    'Rok produkcji',
-    'Jednostka'
-];
+const clickable=['ID','Rejestracja','Województwo','Powiat','Rok produkcji','Jednostka'];
 
-if (clickableFields.includes(f)) {
-    value.style.cursor = 'pointer';
-    value.style.textDecoration = 'underline';
-
-    value.addEventListener('click', () => {
-        document.getElementById('search').value = w[f];
-        filterField = f;
-        currentPage = 1;
-
-        displayWozow();           // ⬅️ odświeża listę
-        lightbox.style.display='none'; // ⬅️ zamyka lightbox
-
-        history.pushState(
-            { search: w[f], field: f },
-            "",
-            ""
-        );
-    });
-}
-
-    
 [
 ['🚨 Podstawowe dane',['ID','Marka','Rok produkcji','Rejestracja','Typ']],
 ['📍 Lokalizacja',['Jednostka','Województwo','Powiat']],
 ['⚡ Status',['Status']],
 ['📝 Inne',['Inne']]
 ].forEach(sec=>{
-const h=document.createElement('h3');
-h.textContent=sec[0];
+const h=document.createElement('h3'); h.textContent=sec[0];
 lightboxDetails.appendChild(h);
 
 sec[1].forEach(f=>{
 if(!w[f])return;
-const r=document.createElement('div');
-r.className='detail-row';
-r.innerHTML=`<div class="detail-label">${f}</div><div class="detail-value">${w[f]}</div>`;
-lightboxDetails.appendChild(r);
+const row=document.createElement('div');
+row.className='detail-row';
+
+const label=document.createElement('div');
+label.className='detail-label';
+label.textContent=f;
+
+const value=document.createElement('div');
+value.className='detail-value';
+value.textContent=w[f];
+
+// klik z lightboxa
+if(clickable.includes(f)){
+value.style.textDecoration='underline';
+value.style.cursor='pointer';
+value.onclick=()=>{
+search.value=w[f];
+filterField=f;
+currentPage=1;
+displayWozow();
+lightbox.style.display='none';
+};
+}
+
+// INNE → OSP/JRG/PSP/KSRG
+if(f==='Inne'){
+value.innerHTML=w[f].replace(
+/\b(?:OSP|JRG|PSP|ZSP|WSP|LSRG|ZSR|KSRG)\s+[\w\sąęłńóśżźć-]+/gi,
+m=>`<span class="osp-link">${m}</span>`
+);
+value.querySelectorAll('.osp-link').forEach(el=>{
+el.onclick=()=>{
+search.value=el.textContent.replace(/^(OSP|JRG|PSP|ZSP|WSP|LSRG|ZSR|KSRG)\s+/i,'');
+filterField='Jednostka';
+currentPage=1;
+displayWozow();
+lightbox.style.display='none';
+};
+});
+}
+
+row.append(label,value);
+lightboxDetails.appendChild(row);
 });
 });
 }
@@ -347,9 +304,6 @@ nextBtn.onclick=()=>openLightbox((lightboxIndex+1)%filteredWozki.length);
 
 search.oninput=()=>{currentPage=1;filterField=null;displayWozow()};
 filterWoj.onchange=()=>{currentPage=1;displayWozow()};
-sortBy.onchange=displayWozow;
-sortDir.onchange=()=>{currentPage=1;displayWozow()};
 </script>
 </body>
 </html>
-
