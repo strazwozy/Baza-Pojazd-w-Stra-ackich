@@ -352,6 +352,22 @@ function openLightbox(i){
 closeLightbox.onclick=()=>lightbox.style.display='none';
 prevBtn.onclick=()=>openLightbox((lightboxIndex-1+filteredWozki.length)%filteredWozki.length);
 nextBtn.onclick=()=>openLightbox((lightboxIndex+1)%filteredWozki.length);
+    document.addEventListener('keydown', e => {
+    if (lightbox.style.display !== 'flex') return;
+
+    if (e.key === 'ArrowLeft') {
+        openLightbox((lightboxIndex - 1 + filteredWozki.length) % filteredWozki.length);
+    }
+
+    if (e.key === 'ArrowRight') {
+        openLightbox((lightboxIndex + 1) % filteredWozki.length);
+    }
+
+    if (e.key === 'Escape') {
+        lightbox.style.display = 'none';
+    }
+});
+
 
 search.oninput=()=>{currentPage=1;filterField=null;displayWozow()};
 filterWoj.onchange=()=>{currentPage=1;displayWozow()};
