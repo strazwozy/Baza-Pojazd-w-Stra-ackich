@@ -255,12 +255,15 @@ function displayWozow(){
         div.className='woz';
         div.innerHTML=`<img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}">
         <div class="woz-info">
-        <strong>ID:</strong> ${w.ID||'-'}
-        <strong>Jednostka:</strong> ${w.Jednostka||'-'}
-        <strong>Marka:</strong> ${w.Marka||'-'}
-        <strong>Rok:</strong> ${w['Rok produkcji']||'-'}
-        <strong>Status:</strong> <span class="status" style="color:${getStatusColor(w.Status)}">${w.Status||'-'}</span>
-        </div>`;
+<strong>ID:</strong> ${w.ID||'-'}
+<strong>Jednostka:</strong> ${w.Jednostka||'-'}
+<strong>Marka:</strong> ${w.Marka||'-'}
+<strong>Rejestracja:</strong> ${w.Rejestracja||'-'}
+<strong>Rok:</strong> ${w['Rok produkcji']||'-'}
+<strong>Status:</strong>
+<span class="status" style="color:${getStatusColor(w.Status)}">${w.Status||'-'}</span>
+</div>
+
         div.onclick=()=>openLightbox(start+i);
         lista.appendChild(div);
     });
