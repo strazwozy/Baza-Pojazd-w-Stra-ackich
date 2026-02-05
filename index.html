@@ -343,6 +343,21 @@ function openLightbox(i){
         });
     });
 }
+    // 🔑 Sterowanie lightboxem klawiaturą
+document.addEventListener('keydown', (e) => {
+    if (lightbox.style.display !== 'flex') return;
+
+    if (e.key === 'ArrowLeft') {
+        prevBtn.click(); // poprzedni wóz
+    }
+    if (e.key === 'ArrowRight') {
+        nextBtn.click(); // następny wóz
+    }
+    if (e.key === 'Escape') {
+        lightbox.style.display = 'none'; // zamknij lightbox
+    }
+});
+
 
 
 closeLightbox.onclick=()=>lightbox.style.display='none';
