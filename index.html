@@ -413,7 +413,9 @@ function openLightbox(i){
         });
     });
 }
-            // Autor zdjęcia
+    });
+
+    // 🔥 AUTOR / FOT.
     const authorBox = document.getElementById('lightboxAuthor');
     if (w.fot) {
         authorBox.textContent = "fot. " + w.fot;
@@ -421,7 +423,6 @@ function openLightbox(i){
         authorBox.textContent = "";
     }
 }
-
 closeLightbox.onclick=()=>lightbox.style.display='none';
 prevBtn.onclick=()=>openLightbox((lightboxIndex-1+filteredWozki.length)%filteredWozki.length);
 nextBtn.onclick=()=>openLightbox((lightboxIndex+1)%filteredWozki.length);
