@@ -217,7 +217,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 <option value="Podlaskie">Podlaskie</option>
 <option value="Świętokrzyskie">Świętokrzyskie</option>
 <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
-<option value="Zachodniopomorskie">Zachodnioporskie</option>
+<option value="Zachodniopomorskie">Zachodniopomorskie</option>
 </select>
 
 <select id="sortBy">
@@ -413,11 +413,12 @@ function openLightbox(i){
         });
     });
 }
-            const authorBox=document.getElementById('lightboxAuthor');
-    if(w.fot){
-        authorBox.textContent="📸 Autor zdjęcia: "+w.fot;
+            // Autor zdjęcia
+    const authorBox = document.getElementById('lightboxAuthor');
+    if (w.fot) {
+        authorBox.textContent = "fot. " + w.fot;
     } else {
-        authorBox.textContent="";
+        authorBox.textContent = "";
     }
 }
 
