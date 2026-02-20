@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>🚒 Baza wozów strażackich</title>
+
 <style>
 * { box-sizing: border-box; margin:0; padding:0; }
 html, body { width:100%; font-family: Arial; background:#1a1a1a; color:white; padding:20px; }
@@ -29,6 +30,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 #sortBy, #sortDir { background:#b30000; color:white; }
 
 #lista { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:20px; }
+
 .woz {
     background:#2a2a2a;
     padding:10px;
@@ -42,6 +44,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     transition:transform 0.2s;
 }
 .woz:hover { transform:scale(1.05); }
+
 .woz img {
     width:180px;
     height:120px;
@@ -49,15 +52,33 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     border-radius:6px;
     margin-bottom:10px;
 }
+
 .woz-info { display:flex; flex-direction: column; gap:5px; text-align:left; width:100%; }
 .woz-info strong { display:inline-block; width:90px; }
 
 .status { font-weight:bold; }
 
 #pagination { display:flex; justify-content:center; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
-.page-btn { padding:8px 12px; border-radius:6px; border:none; cursor:pointer; background:#b30000; color:white; }
+
+.page-btn {
+    padding:8px 12px;
+    border-radius:6px;
+    border:none;
+    cursor:pointer;
+    background:#b30000;
+    color:white;
+}
 .page-btn.active { background:#ff1a1a; font-weight:bold; }
 .page-btn.disabled { background:#555; cursor:default; }
+
+#disclaimer {
+    max-width:1000px;
+    margin:30px auto 0 auto;
+    font-size:14px;
+    line-height:1.6;
+    color:#ccc;
+    text-align:center;
+}
 
 #lightbox {
     display:none;
@@ -68,6 +89,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     align-items:center;
     z-index:1000;
 }
+
 #lightboxContent {
     background:#1a1a1a;
     display:flex;
@@ -78,8 +100,21 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     overflow:hidden;
     position:relative;
 }
-#lightboxImg { max-width:80%; max-height:100%; object-fit:contain; background:#000; }
-#lightboxInfo { flex:1; display:flex; flex-direction:column; overflow-y:auto; }
+
+#lightboxImg {
+    max-width:80%;
+    max-height:100%;
+    object-fit:contain;
+    background:#000;
+}
+
+#lightboxInfo {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
+}
+
 #lightboxTitle {
     background:#E60000;
     padding:15px;
@@ -87,9 +122,20 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     text-align:center;
     font-weight:bold;
 }
-#lightboxDetails { padding:15px; display:flex; flex-direction:column; gap:8px; }
 
-.detail-row { display:flex; justify-content:space-between; border-bottom:1px solid rgba(255,255,255,0.2); padding:5px 0; }
+#lightboxDetails {
+    padding:15px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.detail-row {
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1px solid rgba(255,255,255,0.2);
+    padding:5px 0;
+}
 .detail-label { font-weight:bold; min-width:130px; }
 .detail-value { flex-grow:1; }
 
@@ -124,6 +170,17 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 #prevBtn { left:10px; }
 #nextBtn { right:10px; }
 
+#lightboxAuthor {
+    position:absolute;
+    bottom:15px;
+    right:20px;
+    font-size:14px;
+    background:rgba(0,0,0,0.6);
+    padding:6px 10px;
+    border-radius:6px;
+    color:#ccc;
+}
+
 .osp-link {
     text-decoration: underline;
     cursor: pointer;
@@ -131,6 +188,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 }
 </style>
 </head>
+
 <body>
 
 <h1>🚒 Baza wozów strażackich</h1>
@@ -154,7 +212,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 <option value="Podlaskie">Podlaskie</option>
 <option value="Świętokrzyskie">Świętokrzyskie</option>
 <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
-<option value="Zachodniopomorskie">Zachodniopomorskie</option>
+<option value="Zachodniopomorskie">Zachodnioporskie</option>
 </select>
 
 <select id="sortBy">
@@ -172,6 +230,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 
 <div id="lista"></div>
 <div id="pagination"></div>
+<div id="disclaimer"></div>
 
 <div id="lightbox">
 <button id="prevBtn">&#8592;</button>
@@ -182,12 +241,24 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 <h2 id="lightboxTitle"></h2>
 <div id="lightboxDetails"></div>
 </div>
+<div id="lightboxAuthor"></div>
 </div>
 <button id="nextBtn">&#8594;</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
 <script>
+document.getElementById('disclaimer').innerHTML = `
+Ta baza została stworzona wyłącznie z pasji oraz w celach informacyjnych jako forma ciekawostki motoryzacyjno-pożarniczej.
+Nie przypisuję sobie autorstwa zamieszczonych fotografii oraz nie czerpię z nich żadnych korzyści finansowych.
+Wszystkie zdjęcia pochodzą z ogólnodostępnych źródeł internetowych.
+
+Jeżeli jesteś autorem któregoś zdjęcia i nie zostałeś oznaczony – napisz, a uzupełnię informacje.
+Jeżeli chcesz aby Twoje zdjęcie zostało usunięte – również proszę o kontakt.
+Możesz też przesłać własne fotografie do dodania do bazy.
+`;
+
 const csvUrl = 'https://docs.google.com/spreadsheets/d/1-INf04fbUF_z3l7kUvIr4dm1lv7iJWMVmw-ICWbDfkI/export?format=csv';
 let currentPage = 1;
 const itemsPerPage = 80;
@@ -206,17 +277,6 @@ Papa.parse(csvUrl,{
     }
 });
 
-function getStatusColor(status){
-    if(!status) return 'white';
-    const s=status.toLowerCase();
-    if(s==='czynny') return 'green';
-    if(['wycofany ze służby','sprzedany','rozbity','spłonął'].includes(s)) return 'red';
-    if(s==='przeniesiony') return 'yellow';
-    if(s==='obiekt muzeum') return 'blue';
-    if(s==='porzucony') return 'orange';
-    return 'white';
-}
-
 function displayWozow(){
     const lista=document.getElementById('lista');
     const pagination=document.getElementById('pagination');
@@ -225,69 +285,50 @@ function displayWozow(){
 
     const q=document.getElementById('search').value.toLowerCase();
     const woj=document.getElementById('filterWoj').value;
-    const sortBy=document.getElementById('sortBy').value;
-    const sortDir=document.getElementById('sortDir').value;
-
-    window.wozy.sort((a,b)=>{
-        const A=(a[sortBy]||'').toString().toLowerCase();
-        const B=(b[sortBy]||'').toString().toLowerCase();
-        return sortDir==='asc'?A.localeCompare(B,undefined,{numeric:true}):B.localeCompare(A,undefined,{numeric:true});
-    });
 
     filteredWozki = window.wozy.filter(w=>{
         let ok=true;
         if(q){
-            if(filterField && w[filterField]) ok=w[filterField].toLowerCase().includes(q);
-            else ok=(w.Jednostka||'').toLowerCase().includes(q)||(w.ID||'').toLowerCase().includes(q)||(w.Rejestracja||'').toLowerCase().includes(q)||(w.Marka||'').toLowerCase().includes(q);
+            ok=(w.Jednostka||'').toLowerCase().includes(q)||
+               (w.ID||'').toLowerCase().includes(q)||
+               (w.Rejestracja||'').toLowerCase().includes(q)||
+               (w.Marka||'').toLowerCase().includes(q);
         }
         return ok && (!woj || w.Województwo===woj);
     });
 
-    // Aktualizacja liczby wszystkich wozów
     totalCount.textContent = `Łącznie: ${filteredWozki.length}`;
 
     const totalPages=Math.ceil(filteredWozki.length/itemsPerPage);
-    if(currentPage>totalPages) currentPage=totalPages||1;
     const start=(currentPage-1)*itemsPerPage;
 
     filteredWozki.slice(start,start+itemsPerPage).forEach((w,i)=>{
         const div=document.createElement('div');
         div.className='woz';
-        div.innerHTML=`<img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}">
-       <div class="woz-info">
-<strong>ID:</strong> ${w.ID||'-'}
-<strong>Jednostka:</strong> ${w.Jednostka||'-'}
-<strong>Marka:</strong> ${w.Marka||'-'}
-<strong>Rejestracja:</strong> ${w.Rejestracja||'-'}
-<strong>Rok:</strong> ${w['Rok produkcji']||'-'}
-<strong>Status:</strong>
-<span class="status" style="color:${getStatusColor(w.Status)}">${w.Status||'-'}</span>
-</div>
-`;
-
+        div.innerHTML=`
+        <img src="${w.Zdjęcie||'https://via.placeholder.com/180x120?text=Brak+zdjęcia'}">
+        <div class="woz-info">
+        <strong>ID:</strong> ${w.ID||'-'}
+        <strong>Jednostka:</strong> ${w.Jednostka||'-'}
+        <strong>Marka:</strong> ${w.Marka||'-'}
+        <strong>Rejestracja:</strong> ${w.Rejestracja||'-'}
+        <strong>Rok:</strong> ${w['Rok produkcji']||'-'}
+        </div>`;
         div.onclick=()=>openLightbox(start+i);
         lista.appendChild(div);
     });
 
-    // Stronicowanie Prev/Next + numery stron
     if(totalPages>1){
-        const prev=document.createElement('button'); prev.textContent='Prev'; prev.className='page-btn'; if(currentPage===1){prev.disabled=true; prev.classList.add('disabled');}
-        prev.onclick=()=>{currentPage--; displayWozow();}; pagination.appendChild(prev);
-
         for(let p=1;p<=totalPages;p++){
             const btn=document.createElement('button');
             btn.textContent=p;
             btn.className='page-btn'+(p===currentPage?' active':'');
-            btn.onclick=()=>{currentPage=p; displayWozow();};
+            btn.onclick=()=>{currentPage=p;displayWozow();};
             pagination.appendChild(btn);
         }
-
-        const next=document.createElement('button'); next.textContent='Next'; next.className='page-btn'; if(currentPage===totalPages){next.disabled=true; next.classList.add('disabled');}
-        next.onclick=()=>{currentPage++; displayWozow();}; pagination.appendChild(next);
     }
 }
 
-// Lightbox z przekierowaniami dla wszystkich klikanych pól
 function openLightbox(i){
     lightboxIndex=i;
     const w=filteredWozki[lightboxIndex];
@@ -296,83 +337,28 @@ function openLightbox(i){
     lightboxTitle.textContent=`${w.Marka||'-'} (${w.ID||'-'})`;
     lightboxDetails.innerHTML='';
 
-    // Sekcje lightboxa
-    [
-    ['🚨 Podstawowe dane',['ID','Marka','Rok produkcji','Rejestracja','Typ']],
-    ['📍 Lokalizacja',['Jednostka','Województwo','Powiat']],
-    ['⚡ Status',['Status']],
-    ['📝 Inne',['Inne']]
-    ].forEach(sec=>{
-        const h=document.createElement('h3'); h.textContent=sec[0]; lightboxDetails.appendChild(h);
-        sec[1].forEach(f=>{
-            if(!w[f]) return;
-            const r=document.createElement('div'); r.className='detail-row';
-            const label=document.createElement('div'); label.className='detail-label'; label.textContent=f;
-            const value=document.createElement('div'); value.className='detail-value';
-
-            if(f==='Inne'){
-                // regex tylko dla OSP/JRG/etc
-                const unitRegex = /\b(?:OSP|JRG|PSP|ZSP|WSP|LSRG|ZSR|KSRG)\s+[\w\sąęłóńżźć]+/gi;
-                value.innerHTML=w[f].replace(unitRegex,m=>`<span class="osp-link">${m}</span>`);
-                value.querySelectorAll('.osp-link').forEach(el=>{
-                    el.addEventListener('click',()=>{
-                        const ospName = el.textContent.replace(/^(OSP|JRG|PSP|ZSP|WSP|LSRG|ZSR|KSRG)\s+/i,'').trim();
-                        document.getElementById('search').value=ospName;
-                        filterField='Jednostka';
-                        currentPage=1;
-                        displayWozow();
-                        lightbox.style.display='none';
-                    });
-                });
-            } else {
-                value.textContent = w[f];
-                // Lista pól klikanych do filtrów
-                const clickableFields = ['ID','Jednostka','Marka','Rejestracja','Rok produkcji','Powiat','Województwo'];
-                if(clickableFields.includes(f)){
-                    value.style.textDecoration='underline';
-                    value.style.cursor='pointer';
-                    value.addEventListener('click',()=>{
-                        document.getElementById('search').value = w[f];
-                        filterField = f==='Rok produkcji'?'Rok produkcji':f;
-                        currentPage = 1;
-                        displayWozow();
-                        lightbox.style.display='none';
-                    });
-                }
-            }
-
-            r.appendChild(label);
-            r.appendChild(value);
-            lightboxDetails.appendChild(r);
-        });
-    });
+    const authorBox=document.getElementById('lightboxAuthor');
+    if(w.fot){
+        authorBox.textContent="📸 Autor zdjęcia: "+w.fot;
+    } else {
+        authorBox.textContent="";
+    }
 }
-
 
 closeLightbox.onclick=()=>lightbox.style.display='none';
 prevBtn.onclick=()=>openLightbox((lightboxIndex-1+filteredWozki.length)%filteredWozki.length);
 nextBtn.onclick=()=>openLightbox((lightboxIndex+1)%filteredWozki.length);
-    document.addEventListener('keydown', e => {
-    if (lightbox.style.display !== 'flex') return;
 
-    if (e.key === 'ArrowLeft') {
-        openLightbox((lightboxIndex - 1 + filteredWozki.length) % filteredWozki.length);
-    }
-
-    if (e.key === 'ArrowRight') {
-        openLightbox((lightboxIndex + 1) % filteredWozki.length);
-    }
-
-    if (e.key === 'Escape') {
-        lightbox.style.display = 'none';
-    }
+document.addEventListener('keydown', e=>{
+    if(lightbox.style.display!=='flex') return;
+    if(e.key==='ArrowLeft') prevBtn.click();
+    if(e.key==='ArrowRight') nextBtn.click();
+    if(e.key==='Escape') closeLightbox.click();
 });
 
-
-search.oninput=()=>{currentPage=1;filterField=null;displayWozow()};
+search.oninput=()=>{currentPage=1;displayWozow()};
 filterWoj.onchange=()=>{currentPage=1;displayWozow()};
-sortBy.onchange=displayWozow;
-sortDir.onchange=()=>{currentPage=1;displayWozow()};
 </script>
+
 </body>
 </html>
