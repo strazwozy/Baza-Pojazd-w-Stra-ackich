@@ -405,6 +405,7 @@ function openLightbox(i){
                     });
                 }
             }
+   
 
             r.appendChild(label);
             r.appendChild(value);
@@ -412,7 +413,13 @@ function openLightbox(i){
         });
     });
 }
-   
+            const authorBox=document.getElementById('lightboxAuthor');
+    if(w.fot){
+        authorBox.textContent="📸 Autor zdjęcia: "+w.fot;
+    } else {
+        authorBox.textContent="";
+    }
+}
 
 closeLightbox.onclick=()=>lightbox.style.display='none';
 prevBtn.onclick=()=>openLightbox((lightboxIndex-1+filteredWozki.length)%filteredWozki.length);
