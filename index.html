@@ -421,7 +421,6 @@ function openLightbox(i){
         authorBox.textContent = "fot. " + w.fot;
     } else {
         authorBox.textContent = "";
-    }
 }
 closeLightbox.onclick=()=>lightbox.style.display='none';
 prevBtn.onclick=()=>openLightbox((lightboxIndex-1+filteredWozki.length)%filteredWozki.length);
