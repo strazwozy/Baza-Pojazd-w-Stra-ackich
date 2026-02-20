@@ -412,14 +412,7 @@ function openLightbox(i){
         });
     });
 }
-    // ====== AUTOR ZDJĘCIA (fot) ======
-    const authorBox = document.getElementById('lightboxAuthor');
-    if (w.fot && w.fot.trim() !== '') {
-        authorBox.textContent = "fot. " + w.fot;
-        authorBox.style.display = "block";
-    } else {
-        authorBox.style.display = "none";
-    }
+   
 
 closeLightbox.onclick=()=>lightbox.style.display='none';
 prevBtn.onclick=()=>openLightbox((lightboxIndex-1+filteredWozki.length)%filteredWozki.length);
