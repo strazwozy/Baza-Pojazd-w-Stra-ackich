@@ -181,6 +181,8 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 <div id="lightboxInfo">
 <h2 id="lightboxTitle"></h2>
 <div id="lightboxDetails"></div>
+    <div id="lightboxAuthor"
+     style="padding:15px; font-size:14px; opacity:0.85;">
 </div>
 </div>
 <button id="nextBtn">&#8594;</button>
@@ -346,6 +348,16 @@ function openLightbox(i){
             lightboxDetails.appendChild(r);
         });
     });
+
+    
+ // AUTOR NA DOLE LIGHTBOXA 
+    const authorBox = document.getElementById('lightboxAuthor');
+
+    if (w['Fot.'] && w['Fot.'].trim() !== '') {
+        authorBox.textContent = '📸 fot. ' + w['Fot.'];
+    } else {
+        authorBox.textContent = '';
+    }
 }
 
 
