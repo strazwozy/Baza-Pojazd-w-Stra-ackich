@@ -352,7 +352,7 @@ function openLightbox(i){
     
  // AUTOR NA DOLE LIGHTBOXA 
     const authorBox = document.getElementById('lightboxAuthor');
-
+authorBox.textContent = '📸 fot. ' + (w['Fot.'] || 'BRAK DANYCH');
     if (w['Fot.'] && w['Fot.'].trim() !== '') {
         authorBox.textContent = '📸 fot. ' + w['Fot.'];
     } else {
