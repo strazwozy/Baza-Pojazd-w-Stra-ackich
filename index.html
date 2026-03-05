@@ -129,45 +129,38 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     cursor: pointer;
     color: inherit;
 }
-@media (max-width:768px){
 
+    /* Telefon */
+@media (max-width:768px){
   #lightboxContent{
     flex-direction: column !important;
     width: 100% !important;
     height: auto !important;
     border-radius:0;
   }
-
-  /* MAŁE ZDJĘCIE */
   #lightboxImg{
     width: 100% !important;
-    height: 35vh !important;   /* mniejsze zdjęcie */
+    height: 35vh !important;
     object-fit: cover;
     max-width: 100% !important;
     max-height: none !important;
   }
-
-  /* PANEL Z DANYMI tej samej wysokości co zdjęcie */
   #lightboxInfo{
     width: 100% !important;
-    height: 35vh !important;   /* dopasowane do zdjęcia */
+    height: 35vh !important;
     overflow-y: auto;
   }
-
   #lightboxTitle{
     font-size: 22px;
   }
-
   .detail-label{
     min-width:110px;
   }
-
   #prevBtn,#nextBtn{
     width:45px;
     height:45px;
     font-size:30px;
   }
-
 }
 </style>
 </head>
@@ -397,6 +390,20 @@ authorBox.textContent = '📸 fot. ' + (w['Fot.'] || 'BRAK DANYCH');
         authorBox.textContent = '📸 fot. ' + w['Fot.'];
     } else {
         authorBox.textContent = '';
+    }
+}
+ // ===== POPRAWKA MOBILE =====
+    if(window.innerWidth <= 768){
+        const lbContent = document.getElementById('lightboxContent');
+        const lbImg = document.getElementById('lightboxImg');
+        const lbInfo = document.getElementById('lightboxInfo');
+        lbContent.style.flexDirection = 'column';
+        lbImg.style.width = '100%';
+        lbImg.style.height = '35vh';
+        lbImg.style.maxHeight = 'none';
+        lbInfo.style.width = '100%';
+        lbInfo.style.height = '35vh';
+        lbInfo.style.overflowY = 'auto';
     }
 }
 
