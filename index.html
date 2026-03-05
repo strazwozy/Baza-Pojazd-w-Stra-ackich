@@ -130,7 +130,7 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     color: inherit;
 }
 
-    /* Telefon */
+/* ==================== MOBILE LIGHTBOX FIX ==================== */
 @media (max-width:768px){
   #lightboxContent{
     flex-direction: column !important;
@@ -214,11 +214,12 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
 <div id="lightboxInfo">
 <h2 id="lightboxTitle"></h2>
 <div id="lightboxDetails"></div>
-    <div id="lightboxAuthor"
-     style="padding:15px; font-size:14px; opacity:0.85;">
+<div id="lightboxAuthor"
+style="padding:15px; font-size:14px; opacity:0.85;">
 </div>
 </div>
 <button id="nextBtn">&#8594;</button>
+</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -278,7 +279,6 @@ function displayWozow(){
         return ok && (!woj || w.Województwo===woj);
     });
 
-    // Aktualizacja liczby wszystkich wozów
     totalCount.textContent = `Łącznie: ${filteredWozki.length}`;
 
     const totalPages=Math.ceil(filteredWozki.length/itemsPerPage);
@@ -299,12 +299,10 @@ function displayWozow(){
 <span class="status" style="color:${getStatusColor(w.Status)}">${w.Status||'-'}</span>
 </div>
 `;
-
         div.onclick=()=>openLightbox(start+i);
         lista.appendChild(div);
     });
 
-    // Stronicowanie Prev/Next + numery stron
     if(totalPages>1){
         const prev=document.createElement('button'); prev.textContent='Prev'; prev.className='page-btn'; if(currentPage===1){prev.disabled=true; prev.classList.add('disabled');}
         prev.onclick=()=>{currentPage--; displayWozow();}; pagination.appendChild(prev);
@@ -322,7 +320,6 @@ function displayWozow(){
     }
 }
 
-// Lightbox z przekierowaniami dla wszystkich klikanych pól
 function openLightbox(i){
     lightboxIndex=i;
     const w=filteredWozki[lightboxIndex];
@@ -346,7 +343,6 @@ function openLightbox(i){
             const value=document.createElement('div'); value.className='detail-value';
 
             if(f==='Inne'){
-                // regex tylko dla OSP/JRG/etc
                 const unitRegex = /\b(?:OSP|JRG|PSP|ZSP|WSP|LSRG|ZSR|KSRG)\s+[\w\sąęłóńżźć]+/gi;
                 value.innerHTML=w[f].replace(unitRegex,m=>`<span class="osp-link">${m}</span>`);
                 value.querySelectorAll('.osp-link').forEach(el=>{
@@ -361,7 +357,6 @@ function openLightbox(i){
                 });
             } else {
                 value.textContent = w[f];
-                // Lista pól klikanych do filtrów
                 const clickableFields = ['ID','Jednostka','Marka','Rejestracja','Rok produkcji','Powiat','Województwo'];
                 if(clickableFields.includes(f)){
                     value.style.textDecoration='underline';
@@ -375,24 +370,17 @@ function openLightbox(i){
                     });
                 }
             }
-
             r.appendChild(label);
             r.appendChild(value);
             lightboxDetails.appendChild(r);
         });
     });
 
-    
- // AUTOR NA DOLE LIGHTBOXA 
     const authorBox = document.getElementById('lightboxAuthor');
-authorBox.textContent = '📸 fot. ' + (w['Fot.'] || 'BRAK DANYCH');
-    if (w['Fot.'] && w['Fot.'].trim() !== '') {
-        authorBox.textContent = '📸 fot. ' + w['Fot.'];
-    } else {
-        authorBox.textContent = '';
-    }
-}
- // ===== POPRAWKA MOBILE =====
+    if (w['Fot.'] && w['Fot.'].trim() !== '') authorBox.textContent = '📸 fot. ' + w['Fot.'];
+    else authorBox.textContent = '';
+    
+    // ===== POPRAWKA MOBILE =====
     if(window.innerWidth <= 768){
         const lbContent = document.getElementById('lightboxContent');
         const lbImg = document.getElementById('lightboxImg');
@@ -407,26 +395,15 @@ authorBox.textContent = '📸 fot. ' + (w['Fot.'] || 'BRAK DANYCH');
     }
 }
 
-
 closeLightbox.onclick=()=>lightbox.style.display='none';
 prevBtn.onclick=()=>openLightbox((lightboxIndex-1+filteredWozki.length)%filteredWozki.length);
 nextBtn.onclick=()=>openLightbox((lightboxIndex+1)%filteredWozki.length);
-    document.addEventListener('keydown', e => {
+document.addEventListener('keydown', e => {
     if (lightbox.style.display !== 'flex') return;
-
-    if (e.key === 'ArrowLeft') {
-        openLightbox((lightboxIndex - 1 + filteredWozki.length) % filteredWozki.length);
-    }
-
-    if (e.key === 'ArrowRight') {
-        openLightbox((lightboxIndex + 1) % filteredWozki.length);
-    }
-
-    if (e.key === 'Escape') {
-        lightbox.style.display = 'none';
-    }
+    if (e.key === 'ArrowLeft') openLightbox((lightboxIndex - 1 + filteredWozki.length) % filteredWozki.length);
+    if (e.key === 'ArrowRight') openLightbox((lightboxIndex + 1) % filteredWozki.length);
+    if (e.key === 'Escape') lightbox.style.display = 'none';
 });
-
 
 search.oninput=()=>{currentPage=1;filterField=null;displayWozow()};
 filterWoj.onchange=()=>{currentPage=1;displayWozow()};
