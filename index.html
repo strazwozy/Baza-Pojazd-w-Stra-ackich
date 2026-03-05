@@ -129,44 +129,46 @@ h1 { text-align:center; margin-bottom:20px; font-size:32px; }
     cursor: pointer;
     color: inherit;
 }
-/* Mobilna wersja */
 @media (max-width:768px){
-  #lightboxContent {
+
+  #lightboxContent{
     flex-direction: column !important;
     width: 100% !important;
-    height: 100% !important;
-    border-radius: 0;
+    height: auto !important;
+    border-radius:0;
   }
 
-  #lightboxImg {
+  /* MAŁE ZDJĘCIE */
+  #lightboxImg{
     width: 100% !important;
-    height: 50vh !important; /* połowa ekranu */
-    object-fit: contain;
+    height: 35vh !important;   /* mniejsze zdjęcie */
+    object-fit: cover;
     max-width: 100% !important;
-    max-height: none !important; /* usuwa ograniczenie desktopowe */
+    max-height: none !important;
   }
 
-  #lightboxInfo {
+  /* PANEL Z DANYMI tej samej wysokości co zdjęcie */
+  #lightboxInfo{
     width: 100% !important;
-    height: 50vh !important; /* druga połowa ekranu */
+    height: 35vh !important;   /* dopasowane do zdjęcia */
     overflow-y: auto;
   }
 
-  #lightboxTitle {
+  #lightboxTitle{
     font-size: 22px;
   }
 
-  .detail-label {
-    min-width: 110px;
+  .detail-label{
+    min-width:110px;
   }
 
-  #prevBtn, #nextBtn {
-    width: 45px;
-    height: 45px;
-    font-size: 30px;
+  #prevBtn,#nextBtn{
+    width:45px;
+    height:45px;
+    font-size:30px;
   }
+
 }
-
 </style>
 </head>
 <body>
